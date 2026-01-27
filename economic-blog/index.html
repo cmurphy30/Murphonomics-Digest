@@ -1,115 +1,114 @@
-<!-- 
-    ECONOMIC INSIGHTS DASHBOARD
-    This is the main HTML page that displays economic data and analysis.
-    It uses CSS for styling and JavaScript for interactive features.
--->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Character encoding and responsive design settings -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
-    <!-- Page title shown in browser tab -->
     <title>Economic Blog - Dashboard</title>
-    
-    <!-- Link to the CSS stylesheet for styling -->
-    <link rel="stylesheet" href="styles.css">
-    
-    <!-- Google Fonts: Import Inter (regular font) and Montserrat (bold headings) -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@600;700&family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <!-- HEADER SECTION: Main title and tagline -->
+    <!-- HEADER: Main title and tagline -->
     <header class="site-header">
         <div class="header-container">
-            <!-- Website title -->
-            <h1>Economic Insights</h1>
-            <!-- Subtitle describing the site -->
+            <h1>Muphenomics Digest</h1>
             <p class="subtitle">Real-time economic indicators and analysis</p>
-     !-- MAIN CONTENT: Two-column layout with dashboard and sidebar -->
+        </div>
+    </header>
+
+    <!-- NAVIGATION BAR -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <ul class="nav-menu">
+                <li><a href="#dashboard" class="nav-link active">Data Dashboard</a></li>
+                <li><a href="#opinion" class="nav-link">Opinion Pieces</a></li>
+                <li><a href="#discord" class="nav-link">Discord</a></li>
+            </ul>
+            <div class="social-links">
+                <a href="https://twitter.com" class="social-link" title="Twitter">
+                    <span class="social-icon">𝕏</span>
+                </a>
+                <a href="https://linkedin.com" class="social-link" title="LinkedIn">
+                    <span class="social-icon">in</span>
+                </a>
+                <a href="https://github.com" class="social-link" title="GitHub">
+                    <span class="social-icon">⚙</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- MAIN CONTENT: Two-column layout -->
     <main class="dashboard-container">
-        <!-- LEFT COLUMN: Takes up 2/3 of the width and shows the chart -->
+        <!-- LEFT COLUMN: Economic chart (2/3 width) -->
         <section class="dashboard-column">
-            <!-- Widget containing the economic chart -->
             <div class="dashboard-widget">
-                <!-- Header with title and update timestamp -->
                 <div class="widget-header">
-                    <!-- Chart title -->
                     <h2>Economic Indicators Dashboard</h2>
-                    <!-- Shows when the data was last refreshed (updated by JavaScript) --
-            <div class="dashboard-widget">
-                <!-- Container for the chart -->
+                    <span class="last-updated" id="lastUpdated">Last updated: --</span>
+                </div>
+                
                 <div class="chart-container">
-                    <!-- Loading spinner: shown while data is being fetched -->
                     <div class="loading-spinner" id="loadingSpinner">
                         <div class="spinner"></div>
                         <p>Loading GDP data...</p>
                     </div>
-                    <!-- Canvas element where the chart will be drawn by JavaScript -->
                     <canvas id="gdpChart"></canvas>
                 </div>
 
-                <!-- Legend explaining the chart colors -->
                 <div class="chart-legend">
                     <div class="legend-item">
-                        <!-- Green color for quarters with economic growth -->
                         <span class="legend-color growth"></span>
                         <span>Growth Quarter</span>
                     </div>
                     <div class="legend-item">
-                        <!-- Red color for quarters with economic decline -->
                         <span class="legend-color decline"></span>
                         <span>Decline Quarter</span>
                     </div>
-              IGHT COLUMN: Sidebar taking up 1/3 width with key metrics and articles -->
+                </div>
+
+                <div class="error-message" id="errorMessage" style="display: none;"></div>
+            </div>
+        </section>
+
+        <!-- RIGHT COLUMN: Sidebar (1/3 width) -->
         <aside class="sidebar-column">
-            <!-- SECTION 1: Key Economic Indicators -->
+            <!-- Key Indicators Widget -->
             <section class="sidebar-widget indicators-widget">
-                <!-- Section title -->
                 <h3>Key Indicators</h3>
-                <!-- Grid of 3 indicator cards displayed side-by-side -->
                 <div class="indicators-grid">
-                    <!-- Card 1: Inflation Rate -->
                     <div class="indicator-card">
                         <label>Inflation Rate</label>
-                        <!-- This value gets filled in by JavaScript -->
                         <p class="indicator-value" id="inflationRate">--</p>
                         <span class="indicator-period">YoY</span>
                     </div>
-                    <!-- Card 2: Unemployment Rate -->
                     <div class="indicator-card">
                         <label>Unemployment</label>
-                        <!-- This value gets filled in by JavaScript -->
                         <p class="indicator-value" id="unemploymentRate">--</p>
                         <span class="indicator-period">Rate</span>
                     </div>
-                    <!-- Card 3: Federal Funds Rate -->
                     <div class="indicator-card">
                         <label>Fed Funds Rate</label>
-                        <!-- This value gets filled in by JavaScript --
-                    <div class="indicator-card">
-                        <label>Inflation Rate</label>
-                        <p class="indicator-value" id="inflationRate">--</p>
-                 SECTION 2: Featured Analysis Articles -->
+                        <p class="indicator-value" id="fedRate">--</p>
+                        <span class="indicator-period">Target</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Featured Analysis Widget -->
             <section class="sidebar-widget articles-widget">
-                <!-- Section title -->
                 <h3>Featured Analysis</h3>
-                <!-- Container for article cards -->
                 <div class="articles-list" id="articlesList">
-                    <!-- Article 1 -->
                     <article class="article-card">
                         <span class="article-tag">Market News</span>
                         <h4>Understanding Q4 GDP Growth</h4>
                         <p>Analysis of recent economic trends and what they mean for investors.</p>
                     </article>
-                    <!-- Article 2 -->
                     <article class="article-card">
                         <span class="article-tag">Data Insights</span>
                         <h4>Inflation Trends Explained</h4>
                         <p>Deep dive into historical inflation patterns and current outlook.</p>
                     </article>
-                    <!-- Article 3 -->
                     <article class="article-card">
                         <span class="article-tag">Analysis</span>
                         <h4>Fed Policy Impact</h4>
@@ -118,28 +117,7 @@
                 </div>
             </section>
 
-            <!-- SECTION 3: Data Sources Attribution -->
-            <section class="sidebar-widget sources-widget">
-                <!-- Section title -->
-     !-- FOOTER: Copyright and disclaimer information -->
-    <footer class="site-footer">
-        <p>&copy; 2024 Economic Insights. Data sourced from Federal Reserve Economic Data (FRED). <a href="#">Disclaimer</a></p>
-    </footer>
-
-    <!-- SCRIPTS -->
-    <!-- Chart.js library: used to create the interactive chart -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
-    <!-- Our custom JavaScript file with interactive features --ook.</p>
-                    </article>
-                    <article class="article-card">
-                        <span class="article-tag">Analysis</span>
-                        <h4>Fed Policy Impact</h4>
-                        <p>How recent interest rate decisions affect the broader economy.</p>
-                    </article>
-                </div>
-            </section>
-
-            <!-- Data Sources -->
+            <!-- Data Sources Widget -->
             <section class="sidebar-widget sources-widget">
                 <h3>Data Sources</h3>
                 <p class="sources-text">Data provided by Federal Reserve Economic Data (FRED). Updated quarterly.</p>
@@ -147,11 +125,13 @@
         </aside>
     </main>
 
+    <!-- FOOTER -->
     <footer class="site-footer">
         <p>&copy; 2024 Economic Insights. Data sourced from Federal Reserve Economic Data (FRED). <a href="#">Disclaimer</a></p>
     </footer>
 
+    <!-- SCRIPTS -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
-    <script src="script.js"></script>
+    <script src="js/script.js"></script>
 </body>
 </html>

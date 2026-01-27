@@ -1,549 +1,477 @@
-/* ======================================
-   ECONOMIC INSIGHTS DASHBOARD - STYLES
-   CSS for styling the economic dashboard website
-   ====================================== */
-
-/* Remove default browser margins and padding from all elements */
 * {
     margin: 0;
     padding: 0;
-    box-sizing: border-box; /* Make sizing calculations easier */
+    box-sizing: border-box;
 }
 
-/* CSS VARIABLES: Define colors, fonts, and spacing used throughout the site */
-/* This makes it easy to change the entire look by updating these values */
 :root {
-    /* COLOR PALETTE - Main colors used on the site */
-    --color-primary: #1a1a1a;           /* Dark text color */
-    --color-secondary: #4a4a4a;         /* Medium gray for secondary text */
-    --color-background: #fafafa;        /* Light gray background */
-    --color-surface: #ffffff;           /* White for cards/boxes */
-    --color-border: #e0e0e0;            /* Light gray for borders */
-    --color-accent: #2563eb;            /* Blue for highlights */
-    --color-growth: #10b981;            /* Green for positive indicators */
-    --color-decline: #ef4444;           /* Red for negative indicators */
-    --color-warning: #f59e0b;           /* Orange for warnings */
+    --color-primary: #1f2937;
+    --color-secondary: #6b7280;
+    --color-background: #ffffff;
+    --color-surface: #ffffff;
+    --color-border: #e5e7eb;
+    --color-accent: #0ea5e9;
+    --color-accent-dark: #0284c7;
+    --color-accent-light: #e0f2fe;
+    --color-growth: #10b981;
+    --color-decline: #ef4444;
+    --color-warning: #f59e0b;
     
-    /* FONTS - Typography styles */
-    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;    /* Regular text font */
-    --font-display: 'Montserrat', sans-serif;                                            /* Bold heading font */
+    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-display: 'Montserrat', sans-serif;
+    --font-fun: 'Fredoka', sans-serif;
     
-    /* SPACING - Consistent spacing sizes */
-    --spacing-xs: 0.5rem;      /* Extra small: 8px */
-    --spacing-sm: 1rem;        /* Small: 16px */
-    --spacing-md: 1.5rem;      /* Medium: 24px */
-    --spacing-lg: 2rem;        /* Large: 32px */
-    --spacing-xl: 3rem;        /* Extra large: 48px */
+    --spacing-xs: 0.5rem;
+    --spacing-sm: 1rem;
+    --spacing-md: 1.5rem;
+    --spacing-lg: 2rem;
+    --spacing-xl: 3rem;
     
-    /* SHADOWS - Depth effect shadows */
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);      /* Subtle shadow */
-    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);      /* Medium shadow */
-    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);     /* Strong shadow */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
 }
 
-/* ===== BASE STYLES: Default styles for all HTML elements ===== */
 html {
-    /* Enable smooth scrolling when clicking links */
     scroll-behavior: smooth;
 }
 
 body {
-    /* Set the default font for the entire page */
     font-family: var(--font-sans);
-    /* Light gray background color */
-    background-color: var(--color-background);
-    /* Dark text color for readability */
-    color: var(--color-primary);
-    /* 1.6 times the font size for spacing between lines (readable) */
+    background-color: #ffffff;
+    color: #1f2937;
     line-height: 1.6;
 }
 
-/* ===== HEADER STYLES: Top banner section ===== */
+/* Header */
 .site-header {
-    /* Dark gradient background for visual appeal */
-    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+    background: linear-gradient(135deg, #0284c7 0%, #0369a1 50%, #075985 100%);
+    background-size: 200% 200%;
+    position: relative;
+    overflow: hidden;
     color: white;
-    /* Add padding around the content */
-    padding: var(--spacing-xl) var(--spacing-lg);
-    /* Center text horizontally */
-    text-align: center;
-    /* Add a subtle shadow below the header */
-    box-shadow: var(--shadow-md);
+    padding: var(--spacing-lg) var(--spacing-lg);
+    text-align: left;
+    box-shadow: 0 20px 40px rgba(2, 132, 199, 0.3);
 }
 
-/* Header title styling */
+.site-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        radial-gradient(circle at 20% 50%, rgba(255,255,255,0.15) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(255,255,255,0.08) 0%, transparent 50%);
+    pointer-events: none;
+}
+
+.header-container {
+    position: relative;
+    z-index: 1;
+}
+
 .header-container h1 {
-    /* Use the bold heading font */
-    font-family: var(--font-display);
-    /* Large size for main title */
-    font-size: 2.5rem;
-    /* Bold weight */
-    font-weight: 700;
-    /* Space below the title */
+    font-family: var(--font-fun);
+    font-size: 3.5rem;
+    font-weight: 400;
     margin-bottom: var(--spacing-sm);
-    /* TigAIN DASHBOARD CONTAINER: Two-column layout ===== */
-.dashboard-container {
-    /* CSS Grid creates a 2-column layout */
-    display: grid;
-    /* Left column is 2x wider than right column (2fr to 1fr) */
-    grid-template-columns: 2fr 1fr;
-    /* Space between columns */
-    gap: var(--spacing-lg);
-    /* Maximum width to prevent stretching on wide screens */
-    max-width: 1400px;
-    /* Center the container horizontally */
-    margin: var(--spacing-xl) auto;
-    /* Add padding on left and right */
-    padding: 0 var(--spacing-lg);
+    letter-spacing: -0.5px;
+    color: white;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-/* ===== LEFT COLUMN: Dashboard area ===== */
-/* Arrange items vertically (stacked) */
+.subtitle {
+    font-size: 1.1rem;
+    opacity: 0.95;
+    font-weight: 400;
+    color: #e0f2fe;
+}
+
+/* Navigation Bar */
+.navbar {
+    background: linear-gradient(135deg, #075985 0%, #0369a1 100%);
+    border-bottom: 2px solid rgba(6, 182, 212, 0.3);
+    padding: 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 15px rgba(2, 132, 199, 0.2);
+}
+
+.navbar-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 var(--spacing-lg);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 60px;
+}
+
+.nav-menu {
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    gap: var(--spacing-lg);
+}
+
+.nav-link {
+    color: #e0f2fe;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.95rem;
+    padding: 8px 12px;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+    display: inline-block;
+}
+
+.nav-link:hover,
+.nav-link.active {
+    color: white;
+    background: rgba(6, 182, 212, 0.2);
+    border-bottom: 2px solid #06b6d4;
+    padding-bottom: 6px;
+}
+
+.social-links {
+    display: flex;
+    gap: var(--spacing-md);
+    align-items: center;
+}
+
+.social-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    color: #e0f2fe;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.social-link:hover {
+    background: rgba(6, 182, 212, 0.3);
+    color: white;
+    border-color: #06b6d4;
+    transform: translateY(-2px);
+}
+
+.social-icon {
+    display: inline-block;
+}
+
+.subtitle {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    font-weight: 400;
+}
+
+/* Main Dashboard Container - Two Column Layout */
+.dashboard-container {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: var(--spacing-lg);
+    max-width: 1400px;
+    margin: var(--spacing-xl) auto;
+    padding: 0 var(--spacing-md);
+}
+
 .dashboard-column {
     display: flex;
     flex-direction: column;
 }
 
-/* Main dashboard card/widget styling */
 .dashboard-widget {
-    /* White background for the card */
-    background: var(--color-surface);
-    /* Rounded corners */
-    border-radius: 8px;
-    /* Shadow for depth */
-    box-shadow: var(--shadow-lg);
-    /* Padding inside the card */
+    background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(2, 132, 199, 0.15);
     padding: var(--spacing-lg);
-    /* Smooth shadow animation on hover */
-    transition: box-shadow 0.3s ease;
+    transition: all 0.3s ease;
+    border: 3px solid white;
+    color: white;
 }
 
-/* Enhance shadow on hover for interactivity */
 .dashboard-widget:hover {
-    box-shadow: var(--shadow-lg);
+    box-shadow: 0 12px 30px rgba(2, 132, 199, 0.25);
+    transform: translateY(-2px);
 }
 
-/* Header section of the widget (title + timestamp) */
 .widget-header {
-    /* Items spread apart (title left, timestamp right) */
     display: flex;
     justify-content: space-between;
     align-items: center;
-    /* Space below the header */
     margin-bottom: var(--spacing-lg);
-    /* Padding bel: Where the graph is displayed */
+    padding-bottom: var(--spacing-md);
+    border-bottom: 3px solid rgba(255, 255, 255, 0.3);
+}
+
+.widget-header h2 {
+    font-family: var(--font-display);
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: white;
+}
+
+.last-updated {
+    font-size: 0.875rem;
+    color: #cffafe;
+    font-weight: 500;
+}
+
+/* Chart Container */
 .chart-container {
-    /* Relative positioning for absolute children */
     position: relative;
-    /* Fixed height for the chart */
     height: 400px;
-    /* Space below the chart */
     margin-bottom: var(--spacing-lg);
 }
 
-/* Loading Spinner: Shown while data is being fetched */
 .loading-spinner {
-    /* Cover the entire chart area */
     position: absolute;
     inset: 0;
-    /* Center content vertically and horizontally */
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    /* Semi-transparent white background */
     background: rgba(255, 255, 255, 0.9);
     border-radius: 4px;
-    /* Display above the chart */
     z-index: 10;
 }
 
-/* Animated spinner circle */
 .spinner {
-    /* Square size */
     width: 40px;
     height: 40px;
-    /* Thick border with blue top */
-    border: 4px solid var(--color-border);
-    border-top-color: var(--color-accent);
-    /* Make it circular */
+    border: 4px solid #e0f2fe;
+    border-top-color: #0284c7;
     border-radius: 50%;
-    /* Rotate infinitely (animation defined below) */
     animation: spin 0.8s linear infinite;
 }
 
-/* Animation: Makes the spinner rotate */
-@keyframes spin: Shows what the colors mean */
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.loading-spinner p {
+    margin-top: var(--spacing-md);
+    color: #0284c7;
+    font-size: 0.95rem;
+}
+
+#gdpChart {
+    max-height: 400px;
+}
+
 .chart-legend {
-    /* Items in a row */
     display: flex;
-    /* Space between items */
     gap: var(--spacing-lg);
-    /* Center horizontally */
     justify-content: center;
-    /* Padding inside */
     padding: var(--spacing-md);
-    /* Light background */
     background: var(--color-background);
-    /* Rounded corners */
     border-radius: 6px;
 }
 
-/* Individual legend item */
 .legend-item {
-    /* Align color box and text */
     display: flex;
     align-items: center;
     gap: var(--spacing-sm);
-    /* Smaller text */
     font-size: 0.9rem;
     font-weight: 500;
 }
 
-/* Color box in legend */
 .legend-color {
-    /* Square shape */
     width: 12px;
     height: 12px;
     border-radius: 2px;
 }
 
-/* Green color for growth */
 .legend-color.growth {
     background-color: var(--color-growth);
 }
 
-/* Red color for decline */
 .legend-color.decline {
     background-color: var(--color-decline);
 }
 
-/* Error Message: Shows if data fails to load */
 .error-message {
-    /* Padding inside the message box */
     padding: var(--spacing-md);
-    /* Light red background */
     background-color: #fee2e2;
-    /* Light red border */
-    border: 1px solid #fecaca;
-    /* Rounded corners */
+    border: 2px solid #fecaca;
     border-radius: 6px;
-    /* Dark red text */
-    color:IGHT SIDEBAR: Vertical column with widgets ===== */
+    color: #7f1d1d;
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+/* Sidebar */
 .sidebar-column {
-    /* Stack items vertically */
     display: flex;
     flex-direction: column;
-    /* Space between widgets */
     gap: var(--spacing-lg);
 }
 
-/* Base styles for sidebar sections */
 .sidebar-widget {
-    /* White background */
-    background: var(--color-surface);
-    /* Rounded corners */
-    border-radius: 8px;
-    /* Shadow for depth */
-    box-shadow: var(--shadow-md);
-    /* Padding inside */
+    background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(2, 132, 199, 0.15);
     padding: var(--spacing-lg);
-    /* Animation on hover: move up and strengthen shadow */
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transition: all 0.3s ease;
+    border: 3px solid white;
+    color: white;
 }
 
-/* Interactive hover effect */
 .sidebar-widget:hover {
-    /* Lift the widget slightly */
-    transform: translateY(-2px);
-    /* Enhance shadow */
-    box-shadow: var(--shadow-lg);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(2, 132, 199, 0.25);
 }
 
-/* Sidebar section titles */
 .sidebar-widget h3 {
-    /* Bold heading font */
     font-family: var(--font-display);
-    /* Good size for subheadings */
     font-size: 1.3rem;
     font-weight: 600;
-    /* Space below title */
     margin-bottom: var(--spacing-md);
-    color: var(--color-primary);
-    /* Padding below and border line */
+    color: white;
     padding-bottom: var(--spacing-sm);
-    border-bottom: 2px solid var(--color-border);
+    border-bottom: 3px solid rgba(255, 255, 255, 0.3);
 }
 
-/* ===== INDICATORS WIDGET: Key economic numbers ===== */
-/* Grid layout for the 3 indicator cards */
+/* Indicators Widget */
 .indicators-grid {
-    /* Three equal columns */
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
-    /* Space between items */
     gap: var(--spacing-md);
 }
 
-/* Individual indicator card */
 .indicator-card {
-    /* Light background */
-    background: var(--color-background);
-    /* Padding inside */
+    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
     padding: var(--spacing-md);
-    /* Rounded corners */
-    border-radius: 6px;
-    /* Center text */
+    border-radius: 10px;
     text-align: center;
-    /* Blue accent line on the left */
-    border-left: 3px solid var(--color-accent);
-}
-===== ARTICLES WIDGET: Featured analysis cards ===== */
-/* Container for article cards */
-.articles-list {
-    /* Stack items vertically */
-    display: flex;
-    flex-direction: column;
-    /* Space between items */
-    gap: var(--spacing-md);
-}
-
-/* Individual article card */
-.article-card {
-    /* Padding inside card */
-    padding: var(--spacing-md);
-    /* Light background */
-    background: var(--color-background);
-    /* Rounded corners */
-    border-radius: 6px;
-    /* Blue line on left */
-    border-left: 3px solid var(--color-accent);
-    /* Smooth animation on interaction */
+    border: 2px solid #06b6d4;
+    border-left: 4px solid #06b6d4;
     transition: all 0.3s ease;
-    /* Show clickable cursor */
-    cursor: pointer;
-}
-
-/* Hover effect for article cards */
-.article-card:hover {
-    /* Light blue gradient background */
-    background: linear-gradient(135deg, #f0f4ff 0%, #e0e7ff 100%);
-    /* Dark border on hover */
-    border-left-color: var(--color-primary);
-}
-
-/* Tag badge on article (like "Market News") */
-.article-tag {
-    /* Inline badge */
-    display: inline-block;
-    /* Small uppercase text */
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    /* Blue background with white text */
-    background: var(--color-accent);
     color: white;
-    /* Padding inside the badge */
-    padding: 0.25rem 0.75rem;
-    /* Rounded corners */
-    border-radius: 4px;
-    /* Space below the tag */
+}
+
+.indicator-card:hover {
+    border-color: #06b6d4;
+    box-shadow: 0 8px 20px rgba(2, 132, 199, 0.25);
+}
+
+.indicator-card label {
+    display: block;
+    font-size: 0.75rem;
+    color: #cffafe;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
     margin-bottom: var(--spacing-xs);
 }
 
-/* Article headline */
-.article-cOOTER STYLES ===== */
-.site-footer {
-    /* Dark background matching header */
-    background-color: var(--color-primary);
+.indicator-value {
+    font-size: 2rem;
+    font-weight: 700;
     color: white;
-    /* Center text */
+    font-family: var(--font-display);
+}
+
+.indicator-period {
+    display: block;
+    font-size: 0.8rem;
+    color: #cffafe;
+    margin-top: var(--spacing-xs);
+}
+
+/* Articles Widget */
+.articles-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.article-card {
+    padding: var(--spacing-md);
+    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+    border-radius: 10px;
+    border-left: 4px solid #06b6d4;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+.article-card:hover {
+    background: linear-gradient(135deg, #0369a1 0%, #075985 100%);
+    border-left-color: #06b6d4;
+    box-shadow: 0 8px 20px rgba(2, 132, 199, 0.25);
+    transform: translateY(-2px);
+}
+
+.article-tag {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background: linear-gradient(135deg, #06b6d4 0%, #06b6d4 100%);
+    color: #0369a1;
+    padding: 0.35rem 0.85rem;
+    border-radius: 6px;
+    margin-bottom: var(--spacing-xs);
+}
+
+.article-card h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: var(--spacing-xs);
+    color: white;
+    line-height: 1.4;
+}
+
+.article-card p {
+    font-size: 0.9rem;
+    color: #cffafe;
+    line-height: 1.5;
+}
+
+.sources-text {
+    font-size: 0.9rem;
+    color: var(--color-secondary);
+    line-height: 1.6;
+}
+
+/* Footer */
+.site-footer {
+    background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 50%, #0369a1 100%);
+    color: white;
     text-align: center;
-    /* Padding around content */
     padding: var(--spacing-lg);
-    /* Space above the footer */
     margin-top: var(--spacing-xl);
-    /* Smaller text */
     font-size: 0.9rem;
 }
 
-/* Footer links styling */
 .site-footer a {
-    /* Blue color */
-    color: var(--color-accent);
-    /* No underline */
+    color: #e0f2fe;
     text-decoration: none;
-    /* Fade effect on hover */
-    transition: opacity 0.3s ease;
-}
-
-/* Footer link hover effect */
-.site-footer a:hover {
-    /* Slightly transparent on hover */
-    opacity: 0.8;
-}
-
-/* ===== RESPONSIVE DESIGN: Adapt to different screen sizes ===== */
-
-/* Tablet screens (768px - 1024px) */
-@media (max-width: 1024px) {
-    /* Smaller header title */
-    .header-container h1 {
-        font-size: 2rem;
-    }
-
-    /* Adjust grid proportions */
-    .dashboard-container {
-        grid-template-columns: 1.5fr 1fr;
-        gap: var(--spacing-md);
-        padding: 0 var(--spacing-md);
-    }
-
-    /* Smaller widget title */
-    .widget-header h2 {
-        font-size: 1.5rem;
-    }
-
-    /* Stack indicators vertically on tablets */
-    .indicators-grid {
-        grid-template-columns: 1fr;
-    }
-}
-
-/* Mobile phones (smaller than 768px) */
-@media (max-width: 768px) {
-    /* Stack everything in single column */
-    .dashboard-container {
-        grid-template-columns: 1fr;
-        gap: var(--spacing-md);
-        padding: 0 var(--spacing-sm);
-        margin: var(--spacing-lg) auto;
-    }
-
-    /* Smaller header title on mobile */
-    .header-container h1 {
-        font-size: 1.75rem;
-    }
-
-    /* Smaller subtitle */
-    .subtitle {
-        font-size: 0.95rem;
-    }
-
-    /* Adjust widget header layout */
-    .widget-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: var(--spacing-sm);
-    }
-
-    /* Smaller widget title on mobile */
-    .widget-header h2 {
-        font-size: 1.3rem;
-    }
-
-    /* Smaller chart on mobile */
-    .chart-container {
-        height: 300px;
-    }
-
-    /* Smaller sidebar heading */
-    .sidebar-widget h3 {
-        font-size: 1.1rem;
-    }
-
-    /* Stack indicator cards vertically */
-    .indicators-grid {
-        grid-template-columns: 1fr;
-    }
-
-    /* Smaller number values on mobile */
-    .indicator-value {
-        font-size: 1.5rem;
-    }
-
-    /* Reduce padding in cards on mobile */
-    .dashboard-widget,
-    .sidebar-widget {
-        padding: var(--spacing-md);
-    }
-}
-
-/* Small mobile phones (smaller than 480px) */
-@media (max-width: 480px) {
-    /* Smaller header padding */
-    .site-header {
-        padding: var(--spacing-lg) var(--spacing-sm);
-    }
-
-    /* Even smaller header title */
-    .header-container h1 {
-        font-size: 1.5rem;
-    }
-
-    /* Stack legend items vertically on small screens */
-    .chart-legend {
-        flex-direction: column;
-        gap: var(--spacing-sm);
-    }
-}
-
-/* ===== ACCESSIBILITY: Respect user preferences ===== */
-
-/* Reduced motion: Disable animations for users who prefer no motion */
-@media (prefers-reduced-motion: reduce) {
-    * {
-        /* Instant animations */
-        animation-duration: 0.01ms !important;
-        /* No animation loops */
-        animation-iteration-count: 1 !important;
-        /* Instant transitions */
-        transition-duration: 0.01ms !important;
-    }
-}
-
-/* High Contrast Mode: Stronger borders for visibility */
-@media (prefers-contrast: more) {
-    .dashboard-widget,
-    .sidebar-widget {
-        /* Thick dark border */
-        border: 2px solid var(--color-primary);
-    }
-
-    .widget-header {
-        /* Thicker border */
-        border-bottom: 3px solid var(--color-primary);
-    }
-}
-
-/* Dark Mode Support: Automatic dark theme */
-@media (prefers-color-scheme: dark) {
-    /* Update color variables for dark mode */
-    :root {
-        --color-primary: #f5f5f5;        /* Light text for dark bg */
-        --color-secondary: #b0b0b0;      /* Gray text */
-        --color-background: #1a1a1a;     /* Dark background */
-        --color-surface: #2d2d2d;        /* Dark cards */
-        --color-border: #404040;         /* Dark borders */
-    }
-
-    /* Dark header gradient */    font-size: 0.9rem;
-}
-
-.site-footer a {
-    color: var(--color-accent);
-    text-decoration: none;
-    transition: opacity 0.3s ease;
+    transition: all 0.3s ease;
+    font-weight: 500;
 }
 
 .site-footer a:hover {
-    opacity: 0.8;
+    color: white;
+    text-decoration: underline;
 }
 
-/* ===== Responsive Design ===== */
-
-/* Tablet (768px - 1024px) */
+/* Responsive Design */
 @media (max-width: 1024px) {
     .header-container h1 {
         font-size: 2rem;
@@ -564,7 +492,6 @@ body {
     }
 }
 
-/* Mobile (< 768px) */
 @media (max-width: 768px) {
     .dashboard-container {
         grid-template-columns: 1fr;
@@ -613,7 +540,6 @@ body {
     }
 }
 
-/* Small Mobile (< 480px) */
 @media (max-width: 480px) {
     .site-header {
         padding: var(--spacing-lg) var(--spacing-sm);
@@ -629,7 +555,6 @@ body {
     }
 }
 
-/* ===== Accessibility ===== */
 @media (prefers-reduced-motion: reduce) {
     * {
         animation-duration: 0.01ms !important;
@@ -638,7 +563,6 @@ body {
     }
 }
 
-/* High Contrast Mode */
 @media (prefers-contrast: more) {
     .dashboard-widget,
     .sidebar-widget {
@@ -650,7 +574,6 @@ body {
     }
 }
 
-/* Dark Mode Support */
 @media (prefers-color-scheme: dark) {
     :root {
         --color-primary: #f5f5f5;
