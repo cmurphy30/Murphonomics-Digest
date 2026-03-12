@@ -7,32 +7,147 @@
     <link rel="stylesheet" href="css/styles.css?v=8.0">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
     <style>
-        .books-container {
-            padding: var(--spacing-xl) var(--spacing-xl);
-            min-height: calc(100vh - 60px - 80px);
+        .media-page-container {
+            padding: var(--spacing-xl);
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--spacing-xl);
+            align-items: start;
         }
 
-        .books-placeholder {
+        .media-section {
             background: #ffffff;
             border-radius: 6px;
             border: 1px solid #e2e8f0;
             box-shadow: 0 1px 4px rgba(0, 0, 0, 0.07);
-            padding: var(--spacing-xl);
-            text-align: center;
-            color: var(--color-text-tertiary);
+            padding: var(--spacing-lg);
         }
 
-        .books-placeholder h2 {
+        .media-section h2 {
             font-family: var(--font-display);
             font-size: 1.5rem;
             font-weight: 700;
             color: var(--color-primary);
-            margin-bottom: var(--spacing-sm);
+            padding-bottom: var(--spacing-sm);
+            margin-bottom: var(--spacing-lg);
+            border-bottom: 2px solid #e2e8f0;
         }
 
-        .books-placeholder p {
+        .media-list {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-md);
+        }
+
+        .media-card {
+            display: flex;
+            gap: var(--spacing-md);
+            align-items: flex-start;
+            padding: var(--spacing-md);
+            background: #f8fafc;
+            border-radius: 4px;
+            border: 1px solid #e2e8f0;
+            border-left: 3px solid var(--color-primary);
+            transition: box-shadow 0.2s ease, background 0.2s ease;
+        }
+
+        .media-card:hover {
+            background: #f1f5f9;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        /*
+         * IMAGES: To swap in a real cover/artwork photo, replace the
+         * <div class="media-cover-placeholder ..."> block with:
+         *   <img class="media-cover" src="images/filename.jpg" alt="Title cover">
+         * (square variant for podcasts: <img class="media-cover square" ...>)
+         */
+        .media-cover {
+            width: 72px;
+            height: 96px;
+            border-radius: 4px;
+            object-fit: cover;
+            flex-shrink: 0;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+        }
+
+        .media-cover.square {
+            width: 80px;
+            height: 80px;
+            border-radius: 6px;
+        }
+
+        .media-cover-placeholder {
+            width: 72px;
+            height: 96px;
+            border-radius: 4px;
+            flex-shrink: 0;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-display);
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: white;
+            user-select: none;
+        }
+
+        .media-cover-placeholder.square {
+            width: 80px;
+            height: 80px;
+            border-radius: 6px;
+        }
+
+        .cover-color-1 { background: #1e40af; }
+        .cover-color-2 { background: #0369a1; }
+        .cover-color-3 { background: #0891b2; }
+        .cover-color-4 { background: #d97706; }
+        .cover-color-5 { background: #6d28d9; }
+        .cover-color-6 { background: #b91c1c; }
+        .cover-color-7 { background: #047857; }
+        .cover-color-8 { background: #be185d; }
+
+        .media-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .media-info h3 {
+            font-family: var(--font-display);
             font-size: 1rem;
-            line-height: 1.6;
+            font-weight: 700;
+            color: var(--color-text-primary);
+            line-height: 1.35;
+            margin-bottom: 0.3rem;
+        }
+
+        .media-author {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--color-primary);
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            margin-bottom: 0.5rem;
+        }
+
+        .media-desc {
+            font-size: 0.875rem;
+            color: var(--color-text-secondary);
+            line-height: 1.55;
+        }
+
+        @media (max-width: 900px) {
+            .media-page-container {
+                grid-template-columns: 1fr;
+                padding: var(--spacing-lg);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .media-page-container {
+                padding: var(--spacing-sm);
+            }
         }
     </style>
 </head>
@@ -63,11 +178,96 @@
     </nav>
 
     <!-- MAIN CONTENT -->
-    <main class="books-container">
-        <div class="books-placeholder">
-            <h2>Books, Podcasts, and Stuff</h2>
-            <p>Content coming soon.</p>
-        </div>
+    <main class="media-page-container">
+
+        <!-- ── BOOKS ── -->
+        <section class="media-section">
+            <h2>Books</h2>
+            <div class="media-list">
+
+                <div class="media-card">
+                    <img class="media-cover" src="images/in this economy.jpg" alt="In This Economy? cover">
+                    <div class="media-info">
+                        <h3>In This Economy?</h3>
+                        <p class="media-author">Kyla Scanlon</p>
+                        <p class="media-desc">A sharp, accessible breakdown of how the modern economy actually works — and why it so often feels broken. Scanlon cuts through jargon to explain everything from inflation to vibes-based recessions.</p>
+                    </div>
+                </div>
+
+                <div class="media-card">
+                    <img class="media-cover" src="images/the economic consequences.jpg" alt="The Economic Consequences of Mr. Trump cover">
+                    <div class="media-info">
+                        <h3>The Economic Consequences of Mr. Trump</h3>
+                        <p class="media-author">Philip Coggan</p>
+                        <p class="media-desc">A clear-eyed analysis of what Trump's trade war means for the global economy — drawing on history, data, and the lessons of past protectionist eras to assess the real costs of tariffs and economic nationalism.</p>
+                    </div>
+                </div>
+
+                <div class="media-card">
+                    <img class="media-cover" src="images/arguing with zombies.jpg" alt="Arguing with Zombies cover">
+                    <div class="media-info">
+                        <h3>Arguing with Zombies</h3>
+                        <p class="media-author">Paul Krugman</p>
+                        <p class="media-desc">Krugman takes on the economic myths that refuse to die — from trickle-down tax cuts to the perils of government debt — laying out what mainstream economics actually says and why it matters for policy.</p>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ── PODCASTS ── -->
+        <section class="media-section">
+            <h2>Podcasts</h2>
+            <div class="media-list">
+
+                <div class="media-card">
+                    <img class="media-cover square" src="images/the Morning Brew.avif" alt="Morning Brew Daily">
+                    <div class="media-info">
+                        <h3>Morning Brew Daily</h3>
+                        <p class="media-author">Morning Brew</p>
+                        <p class="media-desc">Daily business and financial news made digestible — sharp takes on markets, tech, and the economy without the noise of traditional financial media.</p>
+                    </div>
+                </div>
+
+                <div class="media-card">
+                    <img class="media-cover square" src="images/brew markets.jpg" alt="Brew Markets">
+                    <div class="media-info">
+                        <h3>Brew Markets</h3>
+                        <p class="media-author">Morning Brew</p>
+                        <p class="media-desc">A deeper dive into markets and investing — equities, macro trends, and what's moving money on Wall Street and beyond.</p>
+                    </div>
+                </div>
+
+                <div class="media-card">
+                    <img class="media-cover square" src="images/odd lots.jpg" alt="Odd Lots">
+                    <div class="media-info">
+                        <h3>Odd Lots</h3>
+                        <p class="media-author">Bloomberg &middot; Joe Weisenthal &amp; Tracy Alloway</p>
+                        <p class="media-desc">Long-form conversations with economists, traders, and thinkers on the weird corners of markets and macroeconomics. Essential listening for anyone who wants to go deeper.</p>
+                    </div>
+                </div>
+
+                <div class="media-card">
+                    <img class="media-cover square" src="images/the journal.avif" alt="The Journal">
+                    <div class="media-info">
+                        <h3>The Journal</h3>
+                        <p class="media-author">The Wall Street Journal</p>
+                        <p class="media-desc">WSJ's flagship daily podcast — concise, reported stories on business, finance, and the forces shaping the economy. A great morning briefing.</p>
+                    </div>
+                </div>
+
+                <div class="media-card">
+                    <img class="media-cover square" src="images/lets appreciate.jpg" alt="Let's Appreciate">
+                    <div class="media-info">
+                        <h3>Let's Appreciate</h3>
+                        <p class="media-author">Let's Appreciate</p>
+                        <p class="media-desc">A refreshing take on understanding the world through an economic lens — accessible, thoughtful, and worth your commute.</p>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
     </main>
 
     <!-- FOOTER -->

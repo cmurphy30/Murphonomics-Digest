@@ -137,18 +137,9 @@ body {
 }
 
 .nav-link.substack-btn {
-    background: #FF6719;
-    color: white;
-    border-radius: 6px;
-    font-weight: 600;
-    border-bottom: none;
-    padding-bottom: 8px;
-}
-
-.nav-link.substack-btn:hover {
-    background: #e55a0f;
-    border-bottom: none;
-    padding-bottom: 8px;
+    background: none;
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 500;
 }
 
 .social-links {

@@ -7,35 +7,67 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function fetchEconomicData() {
     const loadingSpinner = document.getElementById('loadingSpinner');
-    const errorMessage = document.getElementById('errorMessage');
-    
+
     try {
         loadingSpinner.style.display = 'flex';
-        
-        /* Use CORS proxy to bypass browser restrictions */
-        const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
-        const fredUrl = 'https://api.stlouisfed.org/fred/series/';
-        
-        /* Try fetching without API key (FRED allows some requests) */
-        const gdpUrl = 'https://www.fred.org/data/GDP.txt';
-        
-        /* Alternative: Use a data source that supports CORS */
-        const mockGdpResponse = await fetch(gdpUrl);
-        
-        if (!mockGdpResponse.ok) {
-            /* Use mock data if API is unavailable */
-            displayMockData();
-            loadingSpinner.style.display = 'none';
-            return;
+
+        const API_KEY = '459a75b9d65c1c4b7794661625265047';
+        const base = 'https://api.stlouisfed.org/fred/series/observations';
+        const params = `&api_key=${API_KEY}&file_type=json&sort_order=asc`;
+
+        const [gdpRes, cpiRes, unrateRes, fedRes] = await Promise.all([
+            fetch(`${base}?series_id=GDP${params}&observation_start=2018-01-01`),
+            fetch(`${base}?series_id=CPIAUCSL${params}&observation_start=2022-01-01`),
+            fetch(`${base}?series_id=UNRATE${params}&observation_start=2023-01-01`),
+            fetch(`${base}?series_id=FEDFUNDS${params}&observation_start=2023-01-01`)
+        ]);
+
+        if (!gdpRes.ok || !cpiRes.ok || !unrateRes.ok || !fedRes.ok) {
+            throw new Error('One or more FRED API requests failed');
         }
-        
+
+        const [gdpJson, cpiJson, unrateJson, fedJson] = await Promise.all([
+            gdpRes.json(), cpiRes.json(), unrateRes.json(), fedRes.json()
+        ]);
+
+        const gdpObs    = gdpJson.observations.filter(o => o.value !== '.');
+        const cpiObs    = cpiJson.observations.filter(o => o.value !== '.');
+        const unrateObs = unrateJson.observations.filter(o => o.value !== '.');
+        const fedObs    = fedJson.observations.filter(o => o.value !== '.');
+
+        displayGDPChart(gdpObs);
+        updateIndicatorsLive(cpiObs, unrateObs, fedObs);
+
+        const latest = new Date(gdpObs[gdpObs.length - 1].date);
+        document.getElementById('lastUpdated').textContent =
+            'Last updated: ' + latest.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
         loadingSpinner.style.display = 'none';
-        
+
     } catch (error) {
-        console.error('Error fetching data:', error);
-        /* Display mock data as fallback */
+        console.error('FRED API error — falling back to mock data:', error);
         displayMockData();
         loadingSpinner.style.display = 'none';
+    }
+}
+
+function updateIndicatorsLive(cpiObs, unrateObs, fedObs) {
+    /* YoY CPI inflation: compare latest to value 12 months prior */
+    if (cpiObs.length >= 13) {
+        const latest  = parseFloat(cpiObs[cpiObs.length - 1].value);
+        const yearAgo = parseFloat(cpiObs[cpiObs.length - 13].value);
+        const yoy = ((latest - yearAgo) / yearAgo) * 100;
+        document.getElementById('inflationRate').textContent = yoy.toFixed(1) + '%';
+    }
+
+    if (unrateObs.length > 0) {
+        const val = parseFloat(unrateObs[unrateObs.length - 1].value);
+        document.getElementById('unemploymentRate').textContent = val.toFixed(1) + '%';
+    }
+
+    if (fedObs.length > 0) {
+        const val = parseFloat(fedObs[fedObs.length - 1].value);
+        document.getElementById('fedRate').textContent = val.toFixed(2) + '%';
     }
 }
 
@@ -82,29 +114,36 @@ function displayMockData() {
 
 
 function displayGDPChart(observations) {
-    const validData = observations
-        .filter(obs => obs.value && obs.value !== '.')
-        .slice(-16);
-    
-    if (validData.length === 0) return;
-    
-    const labels = validData.map(obs => obs.date);
-    const values = validData.map(obs => parseFloat(obs.value));
-    
-    const backgroundColors = values.map((value, index) => {
-        if (index === 0) return '#2563eb';
-        const change = value - values[index - 1];
-        return change >= 0 ? '#3b82f6' : '#1e40af';
+    /* Need at least 2 data points to compute a growth rate */
+    const allValid = observations.filter(obs => obs.value && obs.value !== '.');
+    if (allValid.length < 2) return;
+
+    /* Keep the last 17 raw values so we can produce 16 growth-rate bars */
+    const raw = allValid.slice(-17);
+
+    const labels = raw.slice(1).map(obs => {
+        const d = new Date(obs.date);
+        const q = Math.floor(d.getUTCMonth() / 3) + 1;
+        return `Q${q} ${d.getUTCFullYear()}`;
     });
-    
+
+    /* QoQ % change: annualised using the standard BEA method ((curr/prev)^4 - 1) * 100 */
+    const growthRates = raw.slice(1).map((obs, i) => {
+        const curr = parseFloat(obs.value);
+        const prev = parseFloat(raw[i].value);
+        return (Math.pow(curr / prev, 4) - 1) * 100;
+    });
+
+    const backgroundColors = growthRates.map(r => r >= 0 ? '#3b82f6' : '#1e40af');
+
     const ctx = document.getElementById('gdpChart').getContext('2d');
     new Chart(ctx, {
         type: 'bar',
         data: {
             labels: labels,
             datasets: [{
-                label: 'GDP (Billions USD)',
-                data: values,
+                label: 'GDP Growth Rate (annualised %)',
+                data: growthRates,
                 backgroundColor: backgroundColors,
                 borderRadius: 4,
                 borderSkipped: false
@@ -116,15 +155,18 @@ function displayGDPChart(observations) {
             plugins: {
                 legend: {
                     display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: ctx => ctx.parsed.y.toFixed(2) + '%'
+                    }
                 }
             },
             scales: {
                 x: {
                     ticks: {
                         color: '#1f2937',
-                        font: {
-                            weight: 500
-                        }
+                        font: { weight: 500 }
                     },
                     grid: {
                         color: 'rgba(30, 64, 175, 0.1)',
@@ -132,15 +174,10 @@ function displayGDPChart(observations) {
                     }
                 },
                 y: {
-                    beginAtZero: false,
                     ticks: {
                         color: '#1f2937',
-                        font: {
-                            weight: 500
-                        },
-                        callback: function(value) {
-                            return '$' + value + 'B';
-                        }
+                        font: { weight: 500 },
+                        callback: value => value.toFixed(1) + '%'
                     },
                     grid: {
                         color: 'rgba(30, 64, 175, 0.1)',
