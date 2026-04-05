@@ -3,44 +3,76 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Economic Blog - Dashboard</title>
-    <link rel="stylesheet" href="css/styles.css?v=8.0">
+    <title>Murphonomics</title>
+    <link rel="stylesheet" href="css/styles.css?v=9.0">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
 </head>
-<body>
-    <!-- HEADER: Main title and tagline -->
-    <header class="site-header">
-        <div class="header-container">
-            <h1>Murphenomics</h1>
-            <p class="subtitle">Real-time economic indicators and analysis</p>
-        </div>
-    </header>
+<body class="hero-page">
 
-    <!-- NAVIGATION BAR -->
-    <nav class="navbar">
-        <div class="navbar-container">
-            <ul class="nav-menu">
-                <li><a href="index.html" class="nav-link active">Home</a></li>
-                <li><a href="dashboard.html" class="nav-link">Data Dashboard</a></li>
-                <li><a href="substack.html" class="nav-link substack-btn">Substack</a></li>
-                <li><a href="books.html" class="nav-link">Books, Podcasts, and Stuff</a></li>
-                <li><a href="#discord" class="nav-link">Discord</a></li>
-            </ul>
-            <div class="social-links">
-                <a href="https://twitter.com" class="social-link" title="Twitter">
-                    <span class="social-icon">𝕏</span>
+    <!-- HERO SECTION: full-screen intro that compresses into a sticky header on scroll -->
+    <div class="hero" id="hero">
+        <canvas class="hero-canvas" id="heroCanvas"></canvas>
+        <div class="hero-content">
+            <h1 class="hero-title" id="heroTitle">Murphonomics</h1>
+            <p class="hero-subtitle" id="heroSubtitle">Real-time economic indicators and analysis</p>
+        </div>
+        <div class="hero-scroll-hint" id="heroScrollHint">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="6 9 12 15 18 9"/>
+            </svg>
+        </div>
+    </div>
+
+    <!-- SIDEBAR NAVIGATION -->
+    <nav class="sidenav" id="sidenav">
+        <ul class="sidenav-menu">
+            <li>
+                <a href="index.html" class="sidenav-link active">
+                    <span class="sidenav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
+                    <span class="sidenav-label">Home</span>
                 </a>
-                <a href="https://linkedin.com" class="social-link" title="LinkedIn">
-                    <span class="social-icon">in</span>
+            </li>
+            <li>
+                <a href="dashboard.html" class="sidenav-link">
+                    <span class="sidenav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>
+                    <span class="sidenav-label">Data Dashboard</span>
                 </a>
-                <a href="https://github.com" class="social-link" title="GitHub">
-                    <span class="social-icon">⚙</span>
+            </li>
+            <li>
+                <a href="substack.html" class="sidenav-link">
+                    <span class="sidenav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></span>
+                    <span class="sidenav-label">Substack</span>
                 </a>
-            </div>
+            </li>
+            <li>
+                <a href="books.html" class="sidenav-link">
+                    <span class="sidenav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></span>
+                    <span class="sidenav-label">Books, Podcasts & Stuff</span>
+                </a>
+            </li>
+            <li>
+                <a href="#discord" class="sidenav-link">
+                    <span class="sidenav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></span>
+                    <span class="sidenav-label">Discord</span>
+                </a>
+            </li>
+        </ul>
+        <div class="sidenav-social">
+            <a href="https://twitter.com" class="sidenav-social-link" title="X / Twitter">
+                <span class="sidenav-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></span>
+                <span class="sidenav-label">X / Twitter</span>
+            </a>
+            <a href="https://linkedin.com" class="sidenav-social-link" title="LinkedIn">
+                <span class="sidenav-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z"/><circle cx="4" cy="4" r="2"/></svg></span>
+                <span class="sidenav-label">LinkedIn</span>
+            </a>
         </div>
     </nav>
 
-    <!-- MAIN CONTENT: Two-column layout -->
+    <!-- Spacer: pushes page content below the hero/header -->
+    <div class="hero-spacer" id="heroSpacer"></div>
+
+    <!-- MAIN CONTENT: Three-column layout -->
     <main class="dashboard-container">
         <!-- LEFT COLUMN: Economic chart (2/3 width) -->
         <section class="dashboard-column">
@@ -49,7 +81,7 @@
                     <h2>GDP Growth Rate</h2>
                     <span class="last-updated" id="lastUpdated">Last updated: --</span>
                 </div>
-                
+
                 <div class="chart-container">
                     <div class="loading-spinner" id="loadingSpinner">
                         <div class="spinner"></div>
@@ -73,9 +105,8 @@
             </div>
         </section>
 
-        <!-- RIGHT COLUMN: Sidebar (1/3 width) -->
+        <!-- MIDDLE COLUMN: Sidebar widgets -->
         <aside class="sidebar-column">
-            <!-- Key Indicators Widget -->
             <section class="sidebar-widget indicators-widget">
                 <h3>Key Indicators</h3>
                 <div class="indicators-grid">
@@ -103,7 +134,6 @@
                 </div>
             </section>
 
-            <!-- Featured Analysis Widget -->
             <section class="sidebar-widget articles-widget">
                 <h3>Featured Analysis</h3>
                 <div class="articles-list" id="articlesList">
@@ -125,7 +155,6 @@
                 </div>
             </section>
 
-            <!-- Data Sources Widget -->
             <section class="sidebar-widget sources-widget">
                 <h3>Data Sources</h3>
                 <p class="sources-text">Data provided by Federal Reserve Economic Data (FRED). Updated quarterly.</p>
@@ -150,7 +179,7 @@
 
     <!-- FOOTER -->
     <footer class="site-footer">
-        <p>&copy; 2024 Economic Insights. Data sourced from Federal Reserve Economic Data (FRED). <a href="#">Disclaimer</a></p>
+        <p>&copy; 2025 Murphonomics. Data sourced from Federal Reserve Economic Data (FRED). <a href="#">Disclaimer</a></p>
     </footer>
 
     <!-- SCRIPTS -->

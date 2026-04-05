@@ -1,9 +1,179 @@
 /* Economic Dashboard - Fetch real data from Federal Reserve API */
 
 document.addEventListener('DOMContentLoaded', () => {
+    initHeroAnimation();
     fetchEconomicData();
     fetchSubstackPosts();
 });
+
+/* ============================================================
+   HERO ANIMATION
+   Full-screen intro that compresses into a sticky header as
+   the user scrolls. Only runs when #hero exists (index.html).
+   ============================================================ */
+
+function initHeroAnimation() {
+    const hero     = document.getElementById('hero');
+    if (!hero) return;
+
+    const spacer   = document.getElementById('heroSpacer');
+    const title    = document.getElementById('heroTitle');
+    const subtitle = document.getElementById('heroSubtitle');
+    const canvas   = document.getElementById('heroCanvas');
+    const hint     = document.getElementById('heroScrollHint');
+    const nav      = document.getElementById('sidenav');
+    const navItems = nav.querySelectorAll('.sidenav-menu li');
+    const socialEl = nav.querySelector('.sidenav-social');
+
+    const FINAL_H      = 68;    // px — resting header height after animation
+    const SCROLL_RANGE = 1225;  // px of scroll to complete the animation
+    const FS_SCALE_END = 1.6 / 5; // title shrinks from 5rem → 1.6rem via transform
+
+    // Spacer height is fixed: scroll range + final header height.
+    // This ensures content starts exactly at the header bottom when animation ends.
+    function setSpacerHeight() {
+        spacer.style.height = (SCROLL_RANGE + FINAL_H) + 'px';
+    }
+    setSpacerHeight();
+    window.addEventListener('resize', setSpacerHeight);
+
+    // Skip animation for users who prefer reduced motion
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        applyProgress(1);
+        return;
+    }
+
+    let raf = null;
+
+    function easeInOut(t) {
+        return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+    }
+
+    function applyProgress(p) {
+        const viewH = window.innerHeight;
+
+        // ── Hero: clip from the bottom (hard edge) ──
+        const clipBottom = (viewH - FINAL_H) * p;
+        hero.style.clipPath = `inset(0 0 ${clipBottom.toFixed(1)}px 0)`;
+
+        // ── Title: scale down AND float upward into header position ──
+        // Without this translateY, the title stays at the vertical center of
+        // the full 100vh hero and vanishes above the visible mask area.
+        const scale      = 1 + (FS_SCALE_END - 1) * p;            // 1.0 → 0.32
+        const translateY = (FINAL_H / 2 - viewH / 2) * p;          // 0 → ~-366px
+        title.style.transform = `translateY(${translateY.toFixed(1)}px) scale(${scale.toFixed(4)})`;
+
+        // ── Subtitle + graph lines fade out ──
+        subtitle.style.opacity = Math.max(0, 1 - p * 2.5).toFixed(3);
+        canvas.style.opacity   = Math.max(0, 1 - p * 1.4).toFixed(3);
+        if (hint) hint.style.opacity = Math.max(0, 1 - p * 4).toFixed(3);
+
+        // ── Sidebar: starts fading in at 15% through animation ──
+        const sideP = Math.max(0, (p - 0.15) / 0.85);
+        nav.style.opacity       = sideP.toFixed(3);
+        nav.style.pointerEvents = sideP > 0.05 ? 'auto' : 'none';
+
+        // ── Nav items: unroll from the bottom of the sidenav ──
+        // All items start just below the sidenav's overflow-clip edge (invisible).
+        // Each item's approximate top position in the sidenav: 12px padding + i * 50px.
+        // Discord (i=4) has the shortest travel → arrives first.
+        // Home (i=0) has the longest travel → arrives last.
+        navItems.forEach((li, i) => {
+            const reverseI  = navItems.length - 1 - i; // Home=4, Discord=0
+            const naturalY  = 12 + i * 50;             // approx top of this item in sidenav
+            const startTy   = (viewH - naturalY) + 1;  // 1px below overflow-clip edge
+
+            // Completion time: Discord finishes at sideP≈0.45, Home at sideP=1.0
+            const sideP_end = 0.45 + 0.55 * (reverseI / Math.max(navItems.length - 1, 1));
+            const itemP     = easeInOut(Math.min(sideP / sideP_end, 1));
+
+            li.style.transform = `translateY(${(startTy * (1 - itemP)).toFixed(1)}px)`;
+        });
+
+        // Social links at the very bottom also rise into place
+        if (socialEl) {
+            const sNatY = 12 + navItems.length * 50 + 12;
+            const sTy   = (viewH - sNatY + 1) * (1 - sideP);
+            socialEl.style.transform = `translateY(${sTy.toFixed(1)}px)`;
+        }
+    }
+
+    function tick() {
+        raf = null;
+        applyProgress(easeInOut(Math.min(window.scrollY / SCROLL_RANGE, 1)));
+    }
+
+    window.addEventListener('scroll', () => { if (!raf) raf = requestAnimationFrame(tick); }, { passive: true });
+    window.addEventListener('resize', tick);
+
+    tick(); // set correct initial state on page load
+
+    startHeroCanvas(canvas);
+}
+
+/* Animated graph-line background for the hero canvas */
+function startHeroCanvas(canvas) {
+    const ctx = canvas.getContext('2d');
+
+    // Each entry defines one chart-like wave: position, frequencies, speed, style
+    const LINES = [
+        { yFrac: 0.30, f1: 1.6, a1: 0.080, f2: 4.5, a2: 0.025, ph: 0.0, spd: 0.20, alpha: 0.16, lw: 2.0 },
+        { yFrac: 0.50, f1: 2.4, a1: 0.055, f2: 6.0, a2: 0.020, ph: 1.4, spd: 0.15, alpha: 0.13, lw: 1.5 },
+        { yFrac: 0.67, f1: 1.3, a1: 0.065, f2: 5.5, a2: 0.022, ph: 2.6, spd: 0.18, alpha: 0.11, lw: 1.5 },
+        { yFrac: 0.40, f1: 3.0, a1: 0.040, f2: 7.5, a2: 0.015, ph: 0.9, spd: 0.25, alpha: 0.09, lw: 1.0 },
+    ];
+
+    let t0 = null;
+
+    function resize() {
+        canvas.width  = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+
+    function draw(ts) {
+        if (!t0) t0 = ts;
+        const t = (ts - t0) / 1000; // seconds elapsed
+
+        const W = canvas.width;
+        const H = canvas.height;
+        ctx.clearRect(0, 0, W, H);
+
+        // Faint horizontal grid lines
+        ctx.strokeStyle = 'rgba(255,255,255,0.035)';
+        ctx.lineWidth   = 1;
+        for (let i = 1; i < 5; i++) {
+            ctx.beginPath();
+            ctx.moveTo(0,   H * i / 5);
+            ctx.lineTo(W, H * i / 5);
+            ctx.stroke();
+        }
+
+        // Chart lines
+        LINES.forEach(l => {
+            ctx.beginPath();
+            ctx.strokeStyle = `rgba(255,255,255,${l.alpha})`;
+            ctx.lineWidth   = l.lw;
+            ctx.lineJoin    = 'round';
+
+            const N = Math.max(60, Math.floor(W / 8));
+            for (let i = 0; i <= N; i++) {
+                const xp = (i / N) * Math.PI * 2;
+                const x  = (i / N) * W;
+                const y  = H * l.yFrac
+                    + Math.sin(xp * l.f1 + t * l.spd * Math.PI * 2)         * H * l.a1
+                    + Math.sin(xp * l.f2 + t * l.spd * Math.PI * 2 + l.ph)  * H * l.a2;
+                i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+        });
+
+        requestAnimationFrame(draw);
+    }
+
+    resize();
+    window.addEventListener('resize', resize);
+    requestAnimationFrame(draw);
+}
 
 async function fetchEconomicData() {
     const loadingSpinner = document.getElementById('loadingSpinner');
