@@ -1,7 +1,12 @@
 [build]
   publish = "."
   functions = "netlify/functions"
+  command = ""
 
 [build.environment]
   # Node 18+ has fetch built in — no extra packages needed in the functions
   NODE_VERSION = "18"
+
+[functions]
+  # @netlify/blobs is provided by Netlify's runtime — tell the bundler not to bundle it
+  external_node_modules = ["@netlify/blobs"]
