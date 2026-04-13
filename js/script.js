@@ -69,7 +69,7 @@ function initHeroAnimation() {
 
         // ── Sidebar fades in during the second half of the hero collapse ──
         // Stays hidden while the hero is prominent; appears with the content.
-        const navOpacity = Math.min(1, Math.max(0, (p - 0.5) * 4));
+        const navOpacity = Math.min(1, Math.max(0, (p - 0.65) * 4));
         nav.style.opacity       = navOpacity.toFixed(3);
         nav.style.pointerEvents = navOpacity > 0.05 ? 'auto' : 'none';
     }
