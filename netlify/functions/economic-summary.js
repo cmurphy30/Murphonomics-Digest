@@ -190,15 +190,27 @@ Include specific numbers. Do not use bullet points — write in full paragraphs.
         // so the frontend can display it without re-parsing the ISO timestamp
         const month = now.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 
-        // ── Save to Netlify Blobs ─────────────────────────────────────────────
-        // @netlify/blobs is required here (not at the top of the file) so that a
-        // missing package does not crash the module on load and break all requests.
+        // ── Save to Netlify Blobs via REST API ───────────────────────────────────
+        // We call the Blobs REST API directly using fetch (Node 18 built-in) instead
+        // of requiring @netlify/blobs, which caused deploy and runtime failures.
+        // NETLIFY_BLOBS_CONTEXT is automatically injected by Netlify into every function.
         // Key format: "summary-YYYY-MM" (e.g. "summary-2025-04").
         try {
-            const { getStore } = require('@netlify/blobs');
-            const store    = getStore('summaries');
+            const blobsCtx = process.env.NETLIFY_BLOBS_CONTEXT;
+            if (!blobsCtx) throw new Error('NETLIFY_BLOBS_CONTEXT not set');
+            const { edgeURL, token, siteID } = JSON.parse(
+                Buffer.from(blobsCtx, 'base64').toString('utf8')
+            );
             const monthKey = `summary-${now.toISOString().slice(0, 7)}`; // "YYYY-MM"
-            await store.setJSON(monthKey, { summary: summaryText, generatedAt, month });
+            const blobRes  = await fetch(
+                `${edgeURL}/${siteID}/summaries/${encodeURIComponent(monthKey)}`,
+                {
+                    method:  'PUT',
+                    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+                    body:    JSON.stringify({ summary: summaryText, generatedAt, month })
+                }
+            );
+            if (!blobRes.ok) throw new Error(`Blobs PUT returned ${blobRes.status}`);
             console.log('[economic-summary] saved to Blobs under key:', monthKey);
         } catch (blobErr) {
             // Non-fatal — log and continue. The Claude response is still returned.
