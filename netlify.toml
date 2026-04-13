@@ -5,7 +5,3 @@
 [build.environment]
   # Node 18+ has fetch built in — no extra packages needed in the functions
   NODE_VERSION = "18"
-
-[functions]
-  # Increase timeout to 26s (Netlify max) — economic-summary calls Claude which can be slow
-  timeout = 26
