@@ -66,35 +66,6 @@ function initHeroAnimation() {
         // ── Subtitle fades out; canvas stays visible as a persistent background ──
         subtitle.style.opacity = Math.max(0, 1 - p * 2.5).toFixed(3);
         if (hint) hint.style.opacity = Math.max(0, 1 - p * 4).toFixed(3);
-
-        // ── Sidebar: starts fading in at 15% through animation ──
-        const sideP = Math.max(0, (p - 0.15) / 0.85);
-        nav.style.opacity       = sideP.toFixed(3);
-        nav.style.pointerEvents = sideP > 0.05 ? 'auto' : 'none';
-
-        // ── Nav items: unroll from the bottom of the sidenav ──
-        // All items start just below the sidenav's overflow-clip edge (invisible).
-        // Each item's approximate top position in the sidenav: 12px padding + i * 50px.
-        // Discord (i=4) has the shortest travel → arrives first.
-        // Home (i=0) has the longest travel → arrives last.
-        navItems.forEach((li, i) => {
-            const reverseI  = navItems.length - 1 - i; // Home=4, Discord=0
-            const naturalY  = 12 + i * 50;             // approx top of this item in sidenav
-            const startTy   = (viewH - naturalY) + 1;  // 1px below overflow-clip edge
-
-            // Completion time: Discord finishes at sideP≈0.45, Home at sideP=1.0
-            const sideP_end = 0.45 + 0.55 * (reverseI / Math.max(navItems.length - 1, 1));
-            const itemP     = easeInOut(Math.min(sideP / sideP_end, 1));
-
-            li.style.transform = `translateY(${(startTy * (1 - itemP)).toFixed(1)}px)`;
-        });
-
-        // Social links at the very bottom also rise into place
-        if (socialEl) {
-            const sNatY = 12 + navItems.length * 50 + 12;
-            const sTy   = (viewH - sNatY + 1) * (1 - sideP);
-            socialEl.style.transform = `translateY(${sTy.toFixed(1)}px)`;
-        }
     }
 
     function tick() {

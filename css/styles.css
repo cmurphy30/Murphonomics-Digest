@@ -1136,19 +1136,9 @@ body {
     flex-shrink: 0;
 }
 
-/* Hero page: sidenav sits above the hero but starts invisible */
+/* Sidenav sits above the hero on the home page */
 .hero-page .sidenav {
     z-index: 400;
-    opacity: 0;
-    pointer-events: none;
-    will-change: opacity;
-}
-
-/* Disable CSS transitions on items we animate via JS */
-.hero-page .sidenav-menu li,
-.hero-page .sidenav-social {
-    transition: none;
-    will-change: transform;
 }
 
 /* Extra breathing room between the sticky header and the dashboard content */
