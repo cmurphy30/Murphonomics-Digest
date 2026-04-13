@@ -1139,6 +1139,49 @@ body {
     margin-top: calc(var(--spacing-xl) + var(--spacing-md));
 }
 
+/* ─── Blue page background (index.html only) ────────────────────────────────
+   Makes the page background match the hero so the scroll transition is
+   seamless instead of hitting a harsh white edge. White cards float on top.
+   Scoped to .hero-page so other pages are unaffected until we roll it out.  */
+
+body.hero-page {
+    background: #1e3a8a;
+}
+
+/* Section header sitting directly on the blue background needs white text */
+body.hero-page .snapshot-section-header h2 {
+    color: #ffffff;
+}
+
+body.hero-page .snapshot-section-header {
+    border-bottom-color: rgba(255, 255, 255, 0.18);
+}
+
+/* Loading spinner text on blue */
+body.hero-page .snapshot-loading-overlay {
+    color: rgba(255, 255, 255, 0.75);
+}
+
+/* CTA buttons placed directly on the blue background (section header + bottom)
+   get a glass style so they stand out without clashing */
+body.hero-page .snapshot-section-header .snapshot-cta-btn,
+body.hero-page .snapshot-footer-cta .snapshot-cta-btn {
+    background: rgba(255, 255, 255, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.38);
+    color: #ffffff;
+}
+
+body.hero-page .snapshot-section-header .snapshot-cta-btn:hover,
+body.hero-page .snapshot-footer-cta .snapshot-cta-btn:hover {
+    background: rgba(255, 255, 255, 0.24);
+    transform: translateY(-1px);
+}
+
+/* Add top breathing room before the Economic Snapshot section on blue */
+body.hero-page .snapshot-section {
+    padding-top: var(--spacing-xl);
+}
+
 @media (max-width: 768px) {
     .hero-content {
         padding-left: calc(60px + 1.25rem);
