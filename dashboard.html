@@ -4,8 +4,279 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Murphonomics - Data Dashboard</title>
-    <link rel="stylesheet" href="css/styles.css?v=8.0">
+    <link rel="stylesheet" href="css/styles.css?v=9.0">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        /* ── Dashboard layout ──────────────────────────────────────────── */
+        .db-loading {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            justify-content: center;
+            padding: var(--spacing-xl) 0;
+            color: var(--color-text-tertiary);
+            font-size: 0.95rem;
+        }
+
+        .db-error {
+            max-width: 860px;
+            margin: var(--spacing-xl) auto;
+            padding: var(--spacing-md);
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            border-radius: 6px;
+            color: #b91c1c;
+            font-size: 0.9rem;
+        }
+
+        .db-wrap {
+            padding: var(--spacing-xl) var(--spacing-xl) var(--spacing-xl) var(--spacing-xl);
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .db-data-errors {
+            background: #fef9ec;
+            border: 1px solid #fde68a;
+            border-radius: 6px;
+            padding: var(--spacing-sm) var(--spacing-md);
+            font-size: 0.82rem;
+            color: #92400e;
+            margin-bottom: var(--spacing-lg);
+        }
+
+        /* ── Economic Summary block ────────────────────────────────────── */
+        .db-summary-block {
+            background: #ffffff;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            border-left: 4px solid var(--color-primary);
+            box-shadow: 0 2px 8px rgba(30, 64, 175, 0.07);
+            padding: var(--spacing-lg);
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .db-summary-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: var(--spacing-sm);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .db-summary-title {
+            font-family: var(--font-display);
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--color-primary);
+            margin-bottom: 0.2rem;
+        }
+
+        .db-summary-month {
+            font-size: 0.82rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--color-primary);
+        }
+
+        .db-summary-actions {
+            display: flex;
+            gap: var(--spacing-md);
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .db-refresh-link {
+            font-size: 0.82rem;
+            color: var(--color-text-tertiary);
+            text-decoration: underline;
+            cursor: pointer;
+        }
+
+        .db-refresh-link:hover {
+            color: var(--color-primary);
+        }
+
+        .db-archive-link {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--color-primary);
+            text-decoration: none;
+        }
+
+        .db-archive-link:hover {
+            text-decoration: underline;
+        }
+
+        .db-summary-status {
+            font-size: 0.9rem;
+            color: var(--color-text-tertiary);
+            padding: var(--spacing-sm) 0;
+        }
+
+        .db-summary-text {
+            font-size: 0.92rem;
+            color: var(--color-text-primary);
+            line-height: 1.75;
+            columns: 2;
+            column-gap: var(--spacing-xl);
+        }
+
+        .db-summary-text p + p {
+            margin-top: var(--spacing-sm);
+        }
+
+        .db-summary-meta {
+            font-size: 0.75rem;
+            color: var(--color-text-tertiary);
+            margin-top: var(--spacing-md);
+        }
+
+        /* ── Section headings ──────────────────────────────────────────── */
+        .db-section {
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .db-section-title {
+            font-family: var(--font-display);
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: var(--color-text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            padding-bottom: var(--spacing-sm);
+            border-bottom: 2px solid #e2e8f0;
+            margin-bottom: var(--spacing-lg);
+        }
+
+        /* ── Panel grid ────────────────────────────────────────────────── */
+        .db-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--spacing-lg);
+        }
+
+        .db-panel--full {
+            grid-column: 1 / -1;
+        }
+
+        /* ── Individual panel ──────────────────────────────────────────── */
+        .db-panel {
+            background: #ffffff;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 2px 8px rgba(30, 64, 175, 0.06);
+            padding: var(--spacing-md);
+        }
+
+        .db-panel-title {
+            font-family: var(--font-display);
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--color-primary);
+            margin-bottom: 0.4rem;
+        }
+
+        .db-panel-stats {
+            display: flex;
+            align-items: baseline;
+            gap: 0.6rem;
+            margin-bottom: 0.2rem;
+        }
+
+        .db-panel-value {
+            font-family: var(--font-display);
+            font-size: 1.65rem;
+            font-weight: 700;
+            color: var(--color-primary);
+            line-height: 1;
+        }
+
+        .db-panel-change {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--color-text-tertiary);
+        }
+
+        .db-panel-updated {
+            font-size: 0.72rem;
+            color: var(--color-text-tertiary);
+            margin-bottom: 0.5rem;
+        }
+
+        .db-hint-btn {
+            font-size: 0.72rem;
+            color: var(--color-text-tertiary);
+            background: none;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+            font-family: var(--font-body);
+            text-decoration: underline;
+            margin-bottom: 0.6rem;
+            display: block;
+        }
+
+        .db-hint-btn:hover {
+            color: var(--color-primary);
+        }
+
+        .db-hint-text {
+            font-size: 0.8rem;
+            color: var(--color-text-secondary);
+            background: #f8fafc;
+            border-left: 3px solid #e2e8f0;
+            border-radius: 0 4px 4px 0;
+            padding: 0.5rem 0.75rem;
+            margin-bottom: 0.75rem;
+            line-height: 1.55;
+        }
+
+        /* Chart containers — half-width vs full-width panels */
+        .db-chart-wrap {
+            position: relative;
+            height: 260px;
+        }
+
+        .db-chart-wrap--lg {
+            height: 320px;
+        }
+
+        /* Per-panel error display */
+        .db-panel-error {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            border-radius: 4px;
+            padding: var(--spacing-sm);
+            color: #b91c1c;
+            font-size: 0.82rem;
+        }
+
+        /* ── Responsive ────────────────────────────────────────────────── */
+        @media (max-width: 900px) {
+            .db-wrap {
+                padding: var(--spacing-lg);
+            }
+
+            .db-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .db-panel--full {
+                grid-column: 1;
+            }
+
+            .db-summary-text {
+                columns: 1;
+            }
+
+            .db-summary-header {
+                flex-direction: column;
+            }
+        }
+    </style>
 </head>
 <body>
 
@@ -61,106 +332,239 @@
         </div>
     </nav>
 
-    <!-- MAIN CONTENT: Two-column layout (no Substack) -->
-    <main class="dashboard-container two-col">
-        <!-- LEFT COLUMN: Economic chart -->
-        <section class="dashboard-column">
-            <div class="dashboard-widget">
-                <div class="widget-header">
-                    <h2>GDP Growth Rate</h2>
-                    <span class="last-updated" id="lastUpdated">Last updated: --</span>
-                </div>
+    <!-- Loading overlay — shown while getData() runs -->
+    <div class="db-loading" id="db-loading">
+        <div class="spinner"></div>
+        <span>Loading economic data&hellip;</span>
+    </div>
 
-                <div class="chart-container">
-                    <div class="loading-spinner" id="loadingSpinner">
-                        <div class="spinner"></div>
-                        <p>Loading GDP growth data...</p>
-                    </div>
-                    <canvas id="gdpChart"></canvas>
-                </div>
+    <!-- Global error (shown only if getData() throws entirely) -->
+    <div class="db-error" id="db-error" style="display:none"></div>
 
-                <div class="chart-legend">
-                    <div class="legend-item">
-                        <span class="legend-color growth"></span>
-                        <span>Growth Quarter</span>
-                    </div>
-                    <div class="legend-item">
-                        <span class="legend-color decline"></span>
-                        <span>Decline Quarter</span>
-                    </div>
-                </div>
+    <!-- Dashboard content — hidden until data is ready -->
+    <div class="db-wrap" id="db-content" style="display:none">
 
-                <div class="error-message" id="errorMessage" style="display: none;"></div>
+        <!-- Non-fatal data-source errors (e.g. one API failed but others loaded) -->
+        <div class="db-data-errors" id="db-data-errors" style="display:none"></div>
+
+        <!-- ── ECONOMIC SUMMARY ──────────────────────────────────────── -->
+        <section class="db-summary-block">
+            <div class="db-summary-header">
+                <div>
+                    <h2 class="db-summary-title">Economic Summary</h2>
+                    <p class="db-summary-month" id="db-summary-month"></p>
+                </div>
+                <div class="db-summary-actions">
+                    <!-- Refresh clears the 30-day cache and requests a new summary from Claude.
+                         Only fires on explicit click — never automatic. -->
+                    <a href="#" class="db-refresh-link" id="db-summary-refresh">&#8635; Refresh</a>
+                    <a href="market-updates.html" class="db-archive-link">View all Market Updates &rarr;</a>
+                </div>
+            </div>
+            <!-- Status line shown while generating / on error -->
+            <p class="db-summary-status" id="db-summary-status" style="display:none"></p>
+            <!-- Summary body, hidden until text arrives -->
+            <div id="db-summary-body" style="display:none">
+                <div class="db-summary-text" id="db-summary-text"></div>
+                <p class="db-summary-meta" id="db-summary-meta"></p>
             </div>
         </section>
 
-        <!-- RIGHT COLUMN: Sidebar -->
-        <aside class="sidebar-column">
-            <!-- Key Indicators Widget -->
-            <section class="sidebar-widget indicators-widget">
-                <h3>Key Indicators</h3>
-                <div class="indicators-grid">
-                    <div class="indicator-card">
-                        <div class="indicator-card-text">
-                            <label>Inflation Rate</label>
-                            <span class="indicator-period">YoY</span>
-                        </div>
-                        <p class="indicator-value" id="inflationRate">--</p>
-                    </div>
-                    <div class="indicator-card">
-                        <div class="indicator-card-text">
-                            <label>Unemployment</label>
-                            <span class="indicator-period">Rate</span>
-                        </div>
-                        <p class="indicator-value" id="unemploymentRate">--</p>
-                    </div>
-                    <div class="indicator-card">
-                        <div class="indicator-card-text">
-                            <label>Fed Funds Rate</label>
-                            <span class="indicator-period">Target</span>
-                        </div>
-                        <p class="indicator-value" id="fedRate">--</p>
-                    </div>
-                </div>
-            </section>
+        <!-- ══════════════════════════════════════════════════════════
+             SECTION 1 — MACROECONOMIC CONDITIONS
+        ══════════════════════════════════════════════════════════ -->
+        <section class="db-section">
+            <h2 class="db-section-title">Section 1 &mdash; Macroeconomic Conditions</h2>
+            <div class="db-grid">
 
-            <!-- Featured Analysis Widget -->
-            <section class="sidebar-widget articles-widget">
-                <h3>Featured Analysis</h3>
-                <div class="articles-list" id="articlesList">
-                    <article class="article-card">
-                        <span class="article-tag">Market News</span>
-                        <h4>Understanding Q4 GDP Growth</h4>
-                        <p>Analysis of recent economic trends and what they mean for investors.</p>
-                    </article>
-                    <article class="article-card">
-                        <span class="article-tag">Data Insights</span>
-                        <h4>Inflation Trends Explained</h4>
-                        <p>Deep dive into historical inflation patterns and current outlook.</p>
-                    </article>
-                    <article class="article-card">
-                        <span class="article-tag">Analysis</span>
-                        <h4>Fed Policy Impact</h4>
-                        <p>How recent interest rate decisions affect the broader economy.</p>
-                    </article>
-                </div>
-            </section>
+                <!-- Panel 1: Real GDP Growth (full width) -->
+                <article class="db-panel db-panel--full">
+                    <h3 class="db-panel-title">Real GDP Growth</h3>
+                    <div class="db-panel-stats">
+                        <span class="db-panel-value" id="val-gdp">--</span>
+                        <span class="db-panel-change" id="chg-gdp"></span>
+                    </div>
+                    <p class="db-panel-updated" id="upd-gdp">Last updated: --</p>
+                    <button class="db-hint-btn" data-panel="gdp">What is this?</button>
+                    <p class="db-hint-text" id="hint-gdp" style="display:none">Real GDP growth measures the inflation-adjusted rate at which the U.S. economy expanded in a quarter, expressed as an annualized percentage. Recession-period bars are shaded red.</p>
+                    <div class="db-chart-wrap db-chart-wrap--lg">
+                        <canvas id="chart-gdp"></canvas>
+                    </div>
+                </article>
 
-            <!-- Data Sources Widget -->
-            <section class="sidebar-widget sources-widget">
-                <h3>Data Sources</h3>
-                <p class="sources-text">Data provided by Federal Reserve Economic Data (FRED). Updated quarterly.</p>
-            </section>
-        </aside>
-    </main>
+                <!-- Panel 2: Inflation Comparison (half width) -->
+                <article class="db-panel">
+                    <h3 class="db-panel-title">Inflation Comparison</h3>
+                    <div class="db-panel-stats">
+                        <span class="db-panel-value" id="val-inflation">--</span>
+                        <span class="db-panel-change" id="chg-inflation"></span>
+                    </div>
+                    <p class="db-panel-updated" id="upd-inflation">Last updated: --</p>
+                    <button class="db-hint-btn" data-panel="inflation">What is this?</button>
+                    <p class="db-hint-text" id="hint-inflation" style="display:none">CPI (Consumer Price Index) measures the average change in prices paid by consumers. "Core" CPI strips out volatile food and energy prices. PCE is the Federal Reserve's preferred inflation gauge.</p>
+                    <div class="db-chart-wrap">
+                        <canvas id="chart-inflation"></canvas>
+                    </div>
+                </article>
+
+                <!-- Panel 3: Labor Force Participation Rate (half width) -->
+                <article class="db-panel">
+                    <h3 class="db-panel-title">Labor Force Participation Rate</h3>
+                    <div class="db-panel-stats">
+                        <span class="db-panel-value" id="val-lfpr">--</span>
+                        <span class="db-panel-change" id="chg-lfpr"></span>
+                    </div>
+                    <p class="db-panel-updated" id="upd-lfpr">Last updated: --</p>
+                    <button class="db-hint-btn" data-panel="lfpr">What is this?</button>
+                    <p class="db-hint-text" id="hint-lfpr" style="display:none">The share of the working-age population that is employed or actively seeking work. A declining rate can reflect retirement trends, discouraged workers, or structural shifts in the labor market.</p>
+                    <div class="db-chart-wrap">
+                        <canvas id="chart-lfpr"></canvas>
+                    </div>
+                </article>
+
+            </div>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════════════
+             SECTION 2 — MONETARY POLICY & DEBT
+        ══════════════════════════════════════════════════════════ -->
+        <section class="db-section">
+            <h2 class="db-section-title">Section 2 &mdash; Monetary Policy &amp; Debt</h2>
+            <div class="db-grid">
+
+                <!-- Panel 4: Fed Funds Rate + Yield Spread (full width) -->
+                <article class="db-panel db-panel--full">
+                    <h3 class="db-panel-title">Federal Funds Rate &amp; 2Y/10Y Yield Spread</h3>
+                    <div class="db-panel-stats">
+                        <span class="db-panel-value" id="val-fed">--</span>
+                        <span class="db-panel-change" id="chg-fed"></span>
+                    </div>
+                    <p class="db-panel-updated" id="upd-fed">Last updated: --</p>
+                    <button class="db-hint-btn" data-panel="fed">What is this?</button>
+                    <p class="db-hint-text" id="hint-fed" style="display:none">The federal funds rate is the overnight borrowing rate set by the Federal Reserve. The yield curve spread (10Y minus 2Y Treasury yield) turns negative when short-term rates exceed long-term rates — a historically reliable recession warning. Inverted periods are shaded red.</p>
+                    <div class="db-chart-wrap db-chart-wrap--lg">
+                        <canvas id="chart-fed"></canvas>
+                    </div>
+                </article>
+
+                <!-- Panel 5: 10-Year Real Yield + Breakeven (half width) -->
+                <article class="db-panel">
+                    <h3 class="db-panel-title">Real Yield &amp; Breakeven Inflation</h3>
+                    <div class="db-panel-stats">
+                        <span class="db-panel-value" id="val-realyield">--</span>
+                        <span class="db-panel-change" id="chg-realyield"></span>
+                    </div>
+                    <p class="db-panel-updated" id="upd-realyield">Last updated: --</p>
+                    <button class="db-hint-btn" data-panel="realyield">What is this?</button>
+                    <p class="db-hint-text" id="hint-realyield" style="display:none">The 10-year real yield (TIPS) shows what investors earn above inflation. The breakeven rate shows where bond markets expect inflation to average over the next decade — the gap between nominal and real yields.</p>
+                    <div class="db-chart-wrap">
+                        <canvas id="chart-realyield"></canvas>
+                    </div>
+                </article>
+
+                <!-- Panel 6: Household Debt Service Ratio (half width) -->
+                <article class="db-panel">
+                    <h3 class="db-panel-title">Household Debt Service Ratio</h3>
+                    <div class="db-panel-stats">
+                        <span class="db-panel-value" id="val-debt">--</span>
+                        <span class="db-panel-change" id="chg-debt"></span>
+                    </div>
+                    <p class="db-panel-updated" id="upd-debt">Last updated: --</p>
+                    <button class="db-hint-btn" data-panel="debt">What is this?</button>
+                    <p class="db-hint-text" id="hint-debt" style="display:none">The share of after-tax income that households spend on mortgage and consumer debt payments. Rising ratios leave consumers with less room to spend or absorb income shocks — a leading indicator of financial stress.</p>
+                    <div class="db-chart-wrap">
+                        <canvas id="chart-debt"></canvas>
+                    </div>
+                </article>
+
+            </div>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════════════
+             SECTION 3 — WAGES, MARKETS & FINANCIAL CONDITIONS
+        ══════════════════════════════════════════════════════════ -->
+        <section class="db-section">
+            <h2 class="db-section-title">Section 3 &mdash; Wages, Markets &amp; Financial Conditions</h2>
+            <div class="db-grid">
+
+                <!-- Panel 7: Real vs. Nominal Wage Growth (full width) -->
+                <article class="db-panel db-panel--full">
+                    <h3 class="db-panel-title">Real vs. Nominal Wage Growth</h3>
+                    <div class="db-panel-stats">
+                        <span class="db-panel-value" id="val-wages">--</span>
+                        <span class="db-panel-change" id="chg-wages"></span>
+                    </div>
+                    <p class="db-panel-updated" id="upd-wages">Last updated: --</p>
+                    <button class="db-hint-btn" data-panel="wages">What is this?</button>
+                    <p class="db-hint-text" id="hint-wages" style="display:none">Nominal wage growth is the raw increase in average hourly pay. Real wage growth subtracts CPI to show whether workers' purchasing power is actually rising. The shaded gap is red when inflation outpaces paychecks.</p>
+                    <div class="db-chart-wrap db-chart-wrap--lg">
+                        <canvas id="chart-wages"></canvas>
+                    </div>
+                </article>
+
+                <!-- Panel 8: Shiller CAPE Ratio (half width) -->
+                <article class="db-panel">
+                    <h3 class="db-panel-title">Shiller CAPE Ratio</h3>
+                    <div class="db-panel-stats">
+                        <span class="db-panel-value" id="val-cape">--</span>
+                        <span class="db-panel-change" id="chg-cape"></span>
+                    </div>
+                    <p class="db-panel-updated" id="upd-cape">Last updated: --</p>
+                    <button class="db-hint-btn" data-panel="cape">What is this?</button>
+                    <p class="db-hint-text" id="hint-cape" style="display:none">The Shiller CAPE ratio divides stock prices by 10-year average inflation-adjusted earnings. High readings have historically preceded below-average long-run returns. The dashed line marks the long-run historical average (~16.8).</p>
+                    <div class="db-chart-wrap">
+                        <canvas id="chart-cape"></canvas>
+                    </div>
+                </article>
+
+                <!-- Panel 9: Credit Spreads (half width) -->
+                <article class="db-panel">
+                    <h3 class="db-panel-title">Credit Spreads (OAS)</h3>
+                    <div class="db-panel-stats">
+                        <span class="db-panel-value" id="val-credit">--</span>
+                        <span class="db-panel-change" id="chg-credit"></span>
+                    </div>
+                    <p class="db-panel-updated" id="upd-credit">Last updated: --</p>
+                    <button class="db-hint-btn" data-panel="credit">What is this?</button>
+                    <p class="db-hint-text" id="hint-credit" style="display:none">OAS (option-adjusted spread) is the extra yield investors demand to hold corporate bonds instead of Treasuries. Wider spreads signal higher perceived risk. High Yield OAS above 600 bps (shaded red) has historically marked periods of significant market stress.</p>
+                    <div class="db-chart-wrap">
+                        <canvas id="chart-credit"></canvas>
+                    </div>
+                </article>
+
+                <!-- Panel 10: U.S. Dollar Index (full width) -->
+                <article class="db-panel db-panel--full">
+                    <h3 class="db-panel-title">U.S. Dollar Index (DXY)</h3>
+                    <div class="db-panel-stats">
+                        <span class="db-panel-value" id="val-dxy">--</span>
+                        <span class="db-panel-change" id="chg-dxy"></span>
+                    </div>
+                    <p class="db-panel-updated" id="upd-dxy">Last updated: --</p>
+                    <button class="db-hint-btn" data-panel="dxy">What is this?</button>
+                    <p class="db-hint-text" id="hint-dxy" style="display:none">The U.S. Dollar Index measures the dollar's value against a basket of six major currencies. Dollar strength affects export competitiveness, commodity prices, and emerging-market debt burdens. Key policy events are annotated.</p>
+                    <div class="db-chart-wrap db-chart-wrap--lg">
+                        <canvas id="chart-dxy"></canvas>
+                    </div>
+                </article>
+
+            </div>
+        </section>
+
+    </div><!-- /.db-wrap -->
 
     <!-- FOOTER -->
     <footer class="site-footer">
-        <p>&copy; 2024 Economic Insights. Data sourced from Federal Reserve Economic Data (FRED). <a href="#">Disclaimer</a></p>
+        <p>&copy; 2025 Murphonomics. Data sourced from FRED, BLS, and BEA. <a href="#">Disclaimer</a></p>
     </footer>
 
-    <!-- SCRIPTS -->
+    <!-- SCRIPTS
+         Load order: Chart.js → cache.js → data-service.js → dashboard.js
+         cache.js defines getFromCache / saveToCache / SUMMARY_CACHE_TTL_MS
+         data-service.js defines getData / fetchSummary (both used by dashboard.js)
+    -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
-    <script src="js/script.js"></script>
+    <script src="js/cache.js"></script>
+    <script src="js/data-service.js"></script>
+    <script src="js/dashboard.js"></script>
 </body>
 </html>
