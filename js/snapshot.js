@@ -430,6 +430,57 @@
                 hour: 'numeric', minute: '2-digit'
             });
         }
+
+        // Wire up collapse behaviour
+        initCollapse();
+    }
+
+    function initCollapse() {
+        const collapsible = document.getElementById('summaryCollapsible');
+        const btn         = document.getElementById('summaryToggleBtn');
+        if (!collapsible || !btn) return;
+
+        // collapsedPx starts as a reasonable estimate and gets refined once
+        // fonts are fully loaded (font metrics affect the rendered height).
+        let collapsedPx = 220;
+
+        // Apply initial collapsed height with no animation on first paint
+        collapsible.style.transition = 'none';
+        collapsible.style.maxHeight  = collapsedPx + 'px';
+        requestAnimationFrame(function () { collapsible.style.transition = ''; });
+
+        // Once fonts are loaded, re-measure and set the true 40% height.
+        // scrollHeight returns the FULL content height even when max-height
+        // is smaller — so this is safe to call while the element is collapsed.
+        document.fonts.ready.then(function () {
+            if (collapsible.classList.contains('collapsed')) {
+                var full = collapsible.scrollHeight;
+                if (full > 80) {
+                    collapsedPx = Math.round(full * 0.4);
+                    collapsible.style.transition = 'none';
+                    collapsible.style.maxHeight  = collapsedPx + 'px';
+                    requestAnimationFrame(function () { collapsible.style.transition = ''; });
+                }
+            }
+        });
+
+        btn.addEventListener('click', function () {
+            if (collapsible.classList.contains('collapsed')) {
+                // Read full height at click-time — fonts are loaded, layout is stable
+                var full = collapsible.scrollHeight;
+                // Store the accurate 40% so collapsing back lands in the right place
+                collapsedPx = Math.round(full * 0.4);
+                collapsible.style.maxHeight = full + 'px';
+                collapsible.classList.remove('collapsed');
+                collapsible.classList.add('expanded');
+                btn.textContent = 'Read Less ↑';
+            } else {
+                collapsible.style.maxHeight = collapsedPx + 'px';
+                collapsible.classList.remove('expanded');
+                collapsible.classList.add('collapsed');
+                btn.textContent = 'Read Full Market Update ↓';
+            }
+        });
     }
 
     // ── Main: wire everything together ─────────────────────────────────────
