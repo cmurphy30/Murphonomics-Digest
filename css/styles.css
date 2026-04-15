@@ -937,18 +937,35 @@ body {
     font-size: 0.95rem;
 }
 
-/* 3-column editorial grid — first panel is featured (spans 2 cols) */
+/* Bento free-form grid — panels use explicit placement above 900px */
 .snapshot-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--spacing-lg);
+    grid-template-columns: repeat(12, 1fr);
+    grid-auto-rows: 60px;
+    gap: 14px;
     margin-bottom: var(--spacing-lg);
 }
 
-.snapshot-panel:first-child,
-.snapshot-panel.wide {
-    grid-column: span 2;
+/* Explicit bento placement (desktop only — overridden by responsive rules below) */
+@media (min-width: 901px) {
+    .snap-inflation { grid-column: 1 / 6;   grid-row: 1 / 9;  }
+    .snap-wages     { grid-column: 6 / 10;  grid-row: 1 / 6;  }
+    .snap-dxy       { grid-column: 10 / 13; grid-row: 1 / 4;  }
+    .snap-fed       { grid-column: 10 / 13; grid-row: 4 / 7;  }
+    .snap-cape      { grid-column: 6 / 10;  grid-row: 6 / 9;  }
+    .snap-yield     { grid-column: 1 / 13;  grid-row: 9 / 13; }
+    .snap-lfpr      { grid-column: 1 / 8;   grid-row: 13 / 18;}
+    .snap-accent    { grid-column: 8 / 13;  grid-row: 13 / 18;}
 }
+
+/* Accent tile — blue decorative card */
+.snap-accent {
+    background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+    justify-content: center;
+}
+.snap-accent .panel-title         { color: rgba(255, 255, 255, 0.65); }
+.snap-accent .panel-latest-value  { color: #ffffff; font-size: 2rem; }
+.snap-accent .panel-updated       { color: rgba(255, 255, 255, 0.55); line-height: 1.6; }
 
 /* Individual chart panel card */
 .snapshot-panel {
@@ -998,8 +1015,9 @@ body {
 /* Constrained height wrapper — chart fills this via responsive: true */
 .panel-chart-wrap {
     position: relative;
-    height: 220px;
     flex: 1;
+    min-height: 80px;
+    height: auto;
 }
 
 /* AI-generated written summary card — feature article treatment */
@@ -1131,9 +1149,20 @@ body {
 @media (max-width: 900px) {
     .snapshot-grid {
         grid-template-columns: repeat(2, 1fr);
+        grid-auto-rows: auto;
     }
-    .snapshot-panel:first-child {
+    /* Reset all explicit bento placement — let panels stack naturally */
+    .snapshot-grid .snapshot-panel {
+        grid-column: auto;
+        grid-row: auto;
+    }
+    .snap-inflation,
+    .snap-yield,
+    .snap-accent {
         grid-column: span 2;
+    }
+    .panel-chart-wrap {
+        height: 180px;
     }
 }
 
@@ -1141,7 +1170,9 @@ body {
     .snapshot-grid {
         grid-template-columns: 1fr;
     }
-    .snapshot-panel:first-child {
+    .snap-inflation,
+    .snap-yield,
+    .snap-accent {
         grid-column: span 1;
     }
 }

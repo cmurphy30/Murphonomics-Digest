@@ -150,11 +150,11 @@
             <span>Loading live economic data…</span>
         </div>
 
-        <!-- Five compact chart panels (hidden until data loads) -->
+        <!-- Bento free-form chart panels (hidden until data loads) -->
         <div class="snapshot-grid" id="snapshotGrid" style="display:none">
 
-            <!-- Panel 1: Inflation — Headline CPI, Core CPI, PCE YoY% -->
-            <div class="snapshot-panel">
+            <!-- Panel 1: Inflation — hero wide panel -->
+            <div class="snapshot-panel snap-inflation">
                 <p class="panel-title">Inflation Comparison</p>
                 <p class="panel-latest-value" id="latestInflation">--</p>
                 <p class="panel-updated" id="updatedInflation">Last updated: --</p>
@@ -163,8 +163,8 @@
                 </div>
             </div>
 
-            <!-- Panel 2: Wages — nominal hourly earnings growth vs. real wage growth -->
-            <div class="snapshot-panel">
+            <!-- Panel 2: Wages -->
+            <div class="snapshot-panel snap-wages">
                 <p class="panel-title">Real vs. Nominal Wage Growth</p>
                 <p class="panel-latest-value" id="latestWages">--</p>
                 <p class="panel-updated" id="updatedWages">Last updated: --</p>
@@ -173,8 +173,8 @@
                 </div>
             </div>
 
-            <!-- Panel 3: U.S. Dollar Index (DXY) -->
-            <div class="snapshot-panel">
+            <!-- Panel 3: Dollar Index — compact accent tile -->
+            <div class="snapshot-panel snap-dxy">
                 <p class="panel-title">U.S. Dollar Index (DXY)</p>
                 <p class="panel-latest-value" id="latestDollarIndex">--</p>
                 <p class="panel-updated" id="updatedDollarIndex">Last updated: --</p>
@@ -183,8 +183,8 @@
                 </div>
             </div>
 
-            <!-- Panel 4: Fed Funds Rate -->
-            <div class="snapshot-panel">
+            <!-- Panel 4: Fed Funds Rate — compact accent tile -->
+            <div class="snapshot-panel snap-fed">
                 <p class="panel-title">Fed Funds Rate</p>
                 <p class="panel-latest-value" id="latestFed">--</p>
                 <p class="panel-updated" id="updatedFed">Last updated: --</p>
@@ -193,8 +193,8 @@
                 </div>
             </div>
 
-            <!-- Panel 5: Shiller CAPE Ratio with historical average reference line -->
-            <div class="snapshot-panel">
+            <!-- Panel 5: CAPE Ratio -->
+            <div class="snapshot-panel snap-cape">
                 <p class="panel-title">Shiller CAPE Ratio</p>
                 <p class="panel-latest-value" id="latestCAPE">--</p>
                 <p class="panel-updated" id="updatedCAPE">Last updated: --</p>
@@ -203,8 +203,8 @@
                 </div>
             </div>
 
-            <!-- Panel 6: 10Y–2Y Yield Curve Spread -->
-            <div class="snapshot-panel">
+            <!-- Panel 6: Yield Curve — full-width banner -->
+            <div class="snapshot-panel snap-yield">
                 <p class="panel-title">10Y–2Y Yield Curve Spread</p>
                 <p class="panel-latest-value" id="latestYieldCurve">--</p>
                 <p class="panel-updated" id="updatedYieldCurve">Last updated: --</p>
@@ -213,14 +213,21 @@
                 </div>
             </div>
 
-            <!-- Panel 7: Labor Force Participation Rate (wide — spans 2 cols) -->
-            <div class="snapshot-panel wide">
+            <!-- Panel 7: Labor Force Participation Rate -->
+            <div class="snapshot-panel snap-lfpr">
                 <p class="panel-title">Labor Force Participation Rate</p>
                 <p class="panel-latest-value" id="latestLFPR">--</p>
                 <p class="panel-updated" id="updatedLFPR">Last updated: --</p>
                 <div class="panel-chart-wrap">
                     <canvas id="chartLFPR"></canvas>
                 </div>
+            </div>
+
+            <!-- Panel 8: Accent tile — decorative context card -->
+            <div class="snapshot-panel snap-accent">
+                <p class="panel-title">Economic Snapshot</p>
+                <p class="panel-latest-value" id="snapshotAccentMonth">--</p>
+                <p class="panel-updated">Seven live indicators tracked daily from FRED &amp; BLS. Scroll up for the full AI-generated monthly summary.</p>
             </div>
 
         </div><!-- /.snapshot-grid -->

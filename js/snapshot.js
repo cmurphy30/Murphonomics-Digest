@@ -498,6 +498,12 @@
             if (loadingEl) loadingEl.style.display = 'none';
             if (gridEl)    gridEl.style.display    = 'grid';
 
+            // Populate accent tile month
+            const accentMonth = document.getElementById('snapshotAccentMonth');
+            if (accentMonth) {
+                accentMonth.textContent = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+            }
+
             // Render each panel — missing data sources show '--' rather than crashing
             renderInflation(data.bls, data.fred);
             renderWages(data.bls);
