@@ -47,12 +47,6 @@
                 </a>
             </li>
             <li>
-                <a href="dashboard.html" class="sidenav-link">
-                    <span class="sidenav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>
-                    <span class="sidenav-label">Data Dashboard</span>
-                </a>
-            </li>
-            <li>
                 <a href="market-updates.html" class="sidenav-link">
                     <span class="sidenav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></span>
                     <span class="sidenav-label">Market Updates</span>
@@ -141,7 +135,6 @@
 
         <div class="snapshot-section-header">
             <h2>Economic Snapshot</h2>
-            <a href="dashboard.html" class="snapshot-cta-btn">View Full Dashboard →</a>
         </div>
 
         <!-- Shown while getData() is running; replaced by the grid once data arrives -->
@@ -153,7 +146,7 @@
         <!-- Bento free-form chart panels (hidden until data loads) -->
         <div class="snapshot-grid" id="snapshotGrid" style="display:none">
 
-            <!-- Panel 1: Inflation — hero wide panel -->
+            <!-- Panel 1: Inflation — hero -->
             <div class="snapshot-panel snap-inflation">
                 <p class="panel-title">Inflation Comparison</p>
                 <p class="panel-latest-value" id="latestInflation">--</p>
@@ -163,7 +156,22 @@
                 </div>
             </div>
 
-            <!-- Panel 2: Wages -->
+            <!-- Panel 2: Real GDP Growth — wide, with time-range toggle -->
+            <div class="snapshot-panel snap-gdp">
+                <p class="panel-title">Real GDP Growth</p>
+                <p class="panel-latest-value" id="latestGDP">--</p>
+                <p class="panel-updated" id="updatedGDP">Last updated: --</p>
+                <div class="range-toggle" id="gdp-range-toggle">
+                    <button class="range-btn" data-years="1">1Y</button>
+                    <button class="range-btn" data-years="5">5Y</button>
+                    <button class="range-btn active" data-years="10">10Y</button>
+                </div>
+                <div class="panel-chart-wrap">
+                    <canvas id="chartGDP"></canvas>
+                </div>
+            </div>
+
+            <!-- Panel 3: Wages -->
             <div class="snapshot-panel snap-wages">
                 <p class="panel-title">Real vs. Nominal Wage Growth</p>
                 <p class="panel-latest-value" id="latestWages">--</p>
@@ -173,57 +181,7 @@
                 </div>
             </div>
 
-            <!-- Panel 3: Dollar Index — compact accent tile -->
-            <div class="snapshot-panel snap-dxy">
-                <p class="panel-title">U.S. Dollar Index (DXY)</p>
-                <p class="panel-latest-value" id="latestDollarIndex">--</p>
-                <p class="panel-updated" id="updatedDollarIndex">Last updated: --</p>
-                <div class="panel-chart-wrap">
-                    <canvas id="chartDollarIndex"></canvas>
-                </div>
-            </div>
-
-            <!-- Panel 4: Fed Funds Rate — compact accent tile -->
-            <div class="snapshot-panel snap-fed">
-                <p class="panel-title">Fed Funds Rate</p>
-                <p class="panel-latest-value" id="latestFed">--</p>
-                <p class="panel-updated" id="updatedFed">Last updated: --</p>
-                <div class="panel-chart-wrap">
-                    <canvas id="chartFed"></canvas>
-                </div>
-            </div>
-
-            <!-- Panel 5: CAPE Ratio -->
-            <div class="snapshot-panel snap-cape">
-                <p class="panel-title">Shiller CAPE Ratio</p>
-                <p class="panel-latest-value" id="latestCAPE">--</p>
-                <p class="panel-updated" id="updatedCAPE">Last updated: --</p>
-                <div class="panel-chart-wrap">
-                    <canvas id="chartCAPE"></canvas>
-                </div>
-            </div>
-
-            <!-- Panel 6: Real GDP Growth -->
-            <div class="snapshot-panel snap-gdp">
-                <p class="panel-title">Real GDP Growth</p>
-                <p class="panel-latest-value" id="latestGDP">--</p>
-                <p class="panel-updated" id="updatedGDP">Last updated: --</p>
-                <div class="panel-chart-wrap">
-                    <canvas id="chartGDP"></canvas>
-                </div>
-            </div>
-
-            <!-- Panel 7: Yield Curve — full-width banner -->
-            <div class="snapshot-panel snap-yield">
-                <p class="panel-title">10Y–2Y Yield Curve Spread</p>
-                <p class="panel-latest-value" id="latestYieldCurve">--</p>
-                <p class="panel-updated" id="updatedYieldCurve">Last updated: --</p>
-                <div class="panel-chart-wrap">
-                    <canvas id="chartYieldCurve"></canvas>
-                </div>
-            </div>
-
-            <!-- Panel 7: Labor Force Participation Rate -->
+            <!-- Panel 4: LFPR -->
             <div class="snapshot-panel snap-lfpr">
                 <p class="panel-title">Labor Force Participation Rate</p>
                 <p class="panel-latest-value" id="latestLFPR">--</p>
@@ -233,11 +191,74 @@
                 </div>
             </div>
 
-            <!-- Panel 8: Accent tile — decorative context card -->
-            <div class="snapshot-panel snap-accent">
-                <p class="panel-title">Economic Snapshot</p>
-                <p class="panel-latest-value" id="snapshotAccentMonth">--</p>
-                <p class="panel-updated">Seven live indicators tracked daily from FRED &amp; BLS. Scroll up for the full AI-generated monthly summary.</p>
+            <!-- Panel 5: Yield Curve — full-width banner -->
+            <div class="snapshot-panel snap-yield">
+                <p class="panel-title">10Y–2Y Yield Curve Spread</p>
+                <p class="panel-latest-value" id="latestYieldCurve">--</p>
+                <p class="panel-updated" id="updatedYieldCurve">Last updated: --</p>
+                <div class="panel-chart-wrap">
+                    <canvas id="chartYieldCurve"></canvas>
+                </div>
+            </div>
+
+            <!-- Panel 6: Fed Funds Rate -->
+            <div class="snapshot-panel snap-fed">
+                <p class="panel-title">Fed Funds Rate</p>
+                <p class="panel-latest-value" id="latestFed">--</p>
+                <p class="panel-updated" id="updatedFed">Last updated: --</p>
+                <div class="panel-chart-wrap">
+                    <canvas id="chartFed"></canvas>
+                </div>
+            </div>
+
+            <!-- Panel 7: Real Yield & Breakeven Inflation -->
+            <div class="snapshot-panel snap-realyield">
+                <p class="panel-title">Real Yield &amp; Breakeven Inflation</p>
+                <p class="panel-latest-value" id="latestRealYield">--</p>
+                <p class="panel-updated" id="updatedRealYield">Last updated: --</p>
+                <div class="panel-chart-wrap">
+                    <canvas id="chartRealYield"></canvas>
+                </div>
+            </div>
+
+            <!-- Panel 8: Shiller CAPE Ratio -->
+            <div class="snapshot-panel snap-cape">
+                <p class="panel-title">Shiller CAPE Ratio</p>
+                <p class="panel-latest-value" id="latestCAPE">--</p>
+                <p class="panel-updated" id="updatedCAPE">Last updated: --</p>
+                <div class="panel-chart-wrap">
+                    <canvas id="chartCAPE"></canvas>
+                </div>
+            </div>
+
+            <!-- Panel 9: U.S. Dollar Index (DXY) -->
+            <div class="snapshot-panel snap-dxy">
+                <p class="panel-title">U.S. Dollar Index (DXY)</p>
+                <p class="panel-latest-value" id="latestDollarIndex">--</p>
+                <p class="panel-updated" id="updatedDollarIndex">Last updated: --</p>
+                <div class="panel-chart-wrap">
+                    <canvas id="chartDollarIndex"></canvas>
+                </div>
+            </div>
+
+            <!-- Panel 10: Credit Spreads (OAS) -->
+            <div class="snapshot-panel snap-creditspreads">
+                <p class="panel-title">Credit Spreads (OAS)</p>
+                <p class="panel-latest-value" id="latestCreditSpreads">--</p>
+                <p class="panel-updated" id="updatedCreditSpreads">Last updated: --</p>
+                <div class="panel-chart-wrap">
+                    <canvas id="chartCreditSpreads"></canvas>
+                </div>
+            </div>
+
+            <!-- Panel 11: Household Debt Service Ratio -->
+            <div class="snapshot-panel snap-debtservice">
+                <p class="panel-title">Household Debt Service Ratio</p>
+                <p class="panel-latest-value" id="latestDebtService">--</p>
+                <p class="panel-updated" id="updatedDebtService">Last updated: --</p>
+                <div class="panel-chart-wrap">
+                    <canvas id="chartDebtService"></canvas>
+                </div>
             </div>
 
         </div><!-- /.snapshot-grid -->

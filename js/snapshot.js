@@ -340,56 +340,213 @@
         });
     }
 
-    // ── Panel 6: Real GDP Growth ──────────────────────────────────────
-    // Quarterly bar chart; bars during recession periods shaded light red
+    // ── Panel 6: Real GDP Growth (with 1Y / 5Y / 10Y toggle) ─────────────
+    // Quarterly bar chart; recession-period bars shaded light red
 
     function renderGDP(bea, fred) {
-        const gdpData = (bea && bea.realGDP) || [];
+        const allData = (bea && bea.realGDP) || [];
         const recSet  = buildRecessionSet(fred && fred.recession);
-        const L       = latest(gdpData);
+        const L       = latest(allData);
 
         document.getElementById('latestGDP').textContent =
             L ? `${L.value.toFixed(1)}% annualized` : '--';
         document.getElementById('updatedGDP').textContent =
             L ? `Last updated: ${fmtQtr(L.date)}` : 'Last updated: --';
 
-        const bgColors = gdpData.map(o => {
-            if (inRecession(o.date, recSet)) return 'rgba(239,68,68,0.45)';
-            return o.value >= 0 ? 'rgba(59,130,246,0.78)' : 'rgba(30,64,175,0.78)';
-        });
+        let gdpChart    = null;
+        let activeYears = 10;
 
-        const opts = baseOptions('%');
-        new Chart(document.getElementById('chartGDP'), {
-            type: 'bar',
-            data: {
-                labels: gdpData.map(o => fmtQtr(o.date)),
-                datasets: [{
-                    label:           'Real GDP Growth (annualized)',
-                    data:            gdpData.map(o => o.value),
-                    backgroundColor: bgColors,
-                    borderRadius:    2,
-                    borderWidth:     0
-                }]
-            },
-            options: {
-                ...opts,
-                plugins: {
-                    ...opts.plugins,
-                    legend: {
-                        display: true,
-                        labels: {
-                            generateLabels: () => [
-                                { text: 'Growth',      fillStyle: 'rgba(59,130,246,0.78)', strokeStyle: 'transparent', fontColor: C.gray },
-                                { text: 'Contraction', fillStyle: 'rgba(30,64,175,0.78)',  strokeStyle: 'transparent', fontColor: C.gray },
-                                { text: 'Recession',   fillStyle: 'rgba(239,68,68,0.45)',  strokeStyle: 'transparent', fontColor: C.gray }
-                            ],
-                            font: { family: "'Inter', sans-serif", size: 10 },
-                            boxWidth: 12,
-                            padding:  6
+        function getSlice(years) { return allData.slice(-(years * 4)); }
+
+        function buildColors(slice) {
+            return slice.map(o => {
+                if (inRecession(o.date, recSet)) return 'rgba(239,68,68,0.45)';
+                return o.value >= 0 ? 'rgba(59,130,246,0.78)' : 'rgba(30,64,175,0.78)';
+            });
+        }
+
+        function drawChart(years) {
+            const slice    = getSlice(years);
+            const bgColors = buildColors(slice);
+            const labels   = slice.map(o => fmtQtr(o.date));
+            const values   = slice.map(o => o.value);
+
+            if (gdpChart) {
+                gdpChart.data.labels                      = labels;
+                gdpChart.data.datasets[0].data            = values;
+                gdpChart.data.datasets[0].backgroundColor = bgColors;
+                gdpChart.update();
+                return;
+            }
+
+            const opts = baseOptions('%');
+            gdpChart = new Chart(document.getElementById('chartGDP'), {
+                type: 'bar',
+                data: {
+                    labels,
+                    datasets: [{
+                        label:           'Real GDP Growth (annualized)',
+                        data:            values,
+                        backgroundColor: bgColors,
+                        borderRadius:    2,
+                        borderWidth:     0
+                    }]
+                },
+                options: {
+                    ...opts,
+                    plugins: {
+                        ...opts.plugins,
+                        legend: {
+                            display: true,
+                            labels: {
+                                generateLabels: () => [
+                                    { text: 'Growth',      fillStyle: 'rgba(59,130,246,0.78)', strokeStyle: 'transparent', fontColor: C.gray },
+                                    { text: 'Contraction', fillStyle: 'rgba(30,64,175,0.78)',  strokeStyle: 'transparent', fontColor: C.gray },
+                                    { text: 'Recession',   fillStyle: 'rgba(239,68,68,0.45)',  strokeStyle: 'transparent', fontColor: C.gray }
+                                ],
+                                font: { family: "'Inter', sans-serif", size: 10 },
+                                boxWidth: 12,
+                                padding:  6
+                            }
                         }
                     }
                 }
+            });
+        }
+
+        const toggleEl = document.getElementById('gdp-range-toggle');
+        if (toggleEl) {
+            toggleEl.addEventListener('click', function (e) {
+                const btn = e.target.closest('[data-years]');
+                if (!btn) return;
+                const years = parseInt(btn.dataset.years, 10);
+                if (years === activeYears) return;
+                activeYears = years;
+                toggleEl.querySelectorAll('.range-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                drawChart(years);
+            });
+        }
+
+        drawChart(activeYears);
+    }
+
+    // ── Panel 9: Real Yield & Breakeven Inflation ─────────────────────────
+    // 10-year TIPS real yield vs. market-implied breakeven inflation expectation
+
+    function renderRealYield(fred) {
+        const realYield = toMonthlyLast((fred && fred.realYield10y)       || []);
+        const breakeven = toMonthlyLast((fred && fred.breakevenInflation) || []);
+        const aligned   = alignValues(realYield, breakeven);
+        const L         = latest(realYield);
+
+        document.getElementById('latestRealYield').textContent =
+            L ? `${L.value.toFixed(2)}% real` : '--';
+        document.getElementById('updatedRealYield').textContent =
+            L ? `Last updated: ${fmtMonth(L.date)}` : 'Last updated: --';
+
+        new Chart(document.getElementById('chartRealYield'), {
+            type: 'line',
+            data: {
+                labels:   realYield.map(o => fmtMonth(o.date)),
+                datasets: [
+                    lineDataset('10Y Real Yield (TIPS)',        realYield.map(o => o.value), C.primary),
+                    lineDataset('Breakeven Inflation (10Y)', aligned,                        C.amber)
+                ]
+            },
+            options: baseOptions('%')
+        });
+    }
+
+    // ── Panel 10: Credit Spreads (OAS) ────────────────────────────────────
+    // Investment Grade vs High Yield option-adjusted spreads in basis points
+    // Periods where HY OAS > 600 bps are shaded red (market stress signal)
+
+    function renderCreditSpreads(fred) {
+        const igMonthly = toMonthlyLast((fred && fred.igSpread) || []);
+        const hyMonthly = toMonthlyLast((fred && fred.hySpread) || []);
+        const igAligned = alignValues(hyMonthly, igMonthly);
+        const L         = latest(hyMonthly);
+
+        document.getElementById('latestCreditSpreads').textContent =
+            L ? `${L.value.toFixed(0)} bps HY` : '--';
+        document.getElementById('updatedCreditSpreads').textContent =
+            L ? `Last updated: ${fmtMonth(L.date)}` : 'Last updated: --';
+
+        const HY_STRESS = 600;
+
+        // Shade periods where HY OAS > 600 bps in light red (stress signal)
+        const stressPlugin = {
+            id: 'hy-stress',
+            afterDraw(chart) {
+                const meta = chart.getDatasetMeta(1);
+                if (!meta.data.length) return;
+                const ctx = chart.ctx, area = chart.chartArea;
+                const hyValues = hyMonthly.map(o => o.value);
+                let inStress = false, startX = null;
+                ctx.save();
+                ctx.beginPath();
+                ctx.rect(area.left, area.top, area.width, area.height);
+                ctx.clip();
+                meta.data.forEach((point, i) => {
+                    const above = hyValues[i] > HY_STRESS;
+                    if (above && !inStress) { inStress = true; startX = point.x; }
+                    else if (!above && inStress) {
+                        inStress = false;
+                        ctx.fillStyle = 'rgba(239,68,68,0.12)';
+                        ctx.fillRect(startX, area.top, point.x - startX, area.height);
+                        startX = null;
+                    }
+                });
+                if (inStress && startX !== null) {
+                    ctx.fillStyle = 'rgba(239,68,68,0.12)';
+                    ctx.fillRect(startX, area.top, meta.data[meta.data.length - 1].x - startX, area.height);
+                }
+                ctx.restore();
             }
+        };
+
+        const opts = baseOptions(' bps');
+        opts.plugins.tooltip.callbacks.label = ctx => {
+            const v = ctx.parsed.y;
+            return ` ${ctx.dataset.label}: ${v != null ? v.toFixed(0) + ' bps' : '—'}`;
+        };
+
+        new Chart(document.getElementById('chartCreditSpreads'), {
+            type: 'line',
+            data: {
+                labels:   hyMonthly.map(o => fmtMonth(o.date)),
+                datasets: [
+                    lineDataset('Investment Grade OAS', igAligned,                   C.blue),
+                    lineDataset('High Yield OAS',       hyMonthly.map(o => o.value), C.red)
+                ]
+            },
+            options: opts,
+            plugins:  [stressPlugin]
+        });
+    }
+
+    // ── Panel 11: Household Debt Service Ratio ────────────────────────────
+    // % of disposable income going to debt payments — rising = consumer stress
+
+    function renderDebtService(fred) {
+        const data = (fred && fred.debtServiceRatio) || [];
+        const L    = latest(data);
+
+        document.getElementById('latestDebtService').textContent =
+            L ? `${L.value.toFixed(2)}%` : '--';
+        document.getElementById('updatedDebtService').textContent =
+            L ? `Last updated: ${fmtMonth(L.date)}` : 'Last updated: --';
+
+        new Chart(document.getElementById('chartDebtService'), {
+            type: 'line',
+            data: {
+                labels:   data.map(o => fmtMonth(o.date)),
+                datasets: [lineDataset('Debt Service Ratio', data.map(o => o.value), C.blue, {
+                    fill: { target: 'origin', above: 'rgba(59,130,246,0.06)' }
+                })]
+            },
+            options: baseOptions('%')
         });
     }
 
@@ -551,21 +708,18 @@
             if (loadingEl) loadingEl.style.display = 'none';
             if (gridEl)    gridEl.style.display    = 'grid';
 
-            // Populate accent tile month
-            const accentMonth = document.getElementById('snapshotAccentMonth');
-            if (accentMonth) {
-                accentMonth.textContent = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-            }
-
             // Render each panel — missing data sources show '--' rather than crashing
             renderInflation(data.bls, data.fred);
-            renderWages(data.bls);
-            renderDollarIndex(data.fred);
-            renderFed(data.fred);
-            renderCAPE(data.fred);
             renderGDP(data.bea, data.fred);
-            renderYieldCurve(data.fred);
+            renderWages(data.bls);
             renderLFPR(data.bls);
+            renderYieldCurve(data.fred);
+            renderFed(data.fred);
+            renderRealYield(data.fred);
+            renderCAPE(data.fred);
+            renderDollarIndex(data.fred);
+            renderCreditSpreads(data.fred);
+            renderDebtService(data.fred);
 
             // Render the AI-written summary (may be null if Claude call failed)
             renderSummary(data.summary);

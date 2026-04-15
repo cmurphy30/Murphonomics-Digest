@@ -948,15 +948,51 @@ body {
 
 /* Explicit bento placement (desktop only — overridden by responsive rules below) */
 @media (min-width: 901px) {
-    .snap-inflation { grid-column: 1 / 6;   grid-row: 1 / 9;  }
-    .snap-wages     { grid-column: 6 / 10;  grid-row: 1 / 6;  }
-    .snap-dxy       { grid-column: 10 / 13; grid-row: 1 / 4;  }
-    .snap-fed       { grid-column: 10 / 13; grid-row: 4 / 7;  }
-    .snap-cape      { grid-column: 6 / 10;  grid-row: 6 / 9;  }
-    .snap-gdp       { grid-column: 10 / 13; grid-row: 7 / 10; }
-    .snap-yield     { grid-column: 1 / 13;  grid-row: 10 / 14;}
-    .snap-lfpr      { grid-column: 1 / 8;   grid-row: 14 / 19;}
-    .snap-accent    { grid-column: 8 / 13;  grid-row: 14 / 19;}
+    /* Row 1: Inflation hero (left) + GDP wide bar chart (right) */
+    .snap-inflation    { grid-column: 1 / 6;   grid-row: 1 / 9;  }
+    .snap-gdp          { grid-column: 6 / 13;  grid-row: 1 / 5;  }
+    /* Row 2: Wages + LFPR fill under GDP */
+    .snap-wages        { grid-column: 6 / 10;  grid-row: 5 / 9;  }
+    .snap-lfpr         { grid-column: 10 / 13; grid-row: 5 / 9;  }
+    /* Full-width yield curve banner */
+    .snap-yield        { grid-column: 1 / 13;  grid-row: 9 / 13; }
+    /* Middle band: Fed, Real Yield, CAPE */
+    .snap-fed          { grid-column: 1 / 4;   grid-row: 13 / 18;}
+    .snap-realyield    { grid-column: 4 / 8;   grid-row: 13 / 18;}
+    .snap-cape         { grid-column: 8 / 13;  grid-row: 13 / 18;}
+    /* Bottom band: DXY, Credit Spreads, Debt Service */
+    .snap-dxy          { grid-column: 1 / 5;   grid-row: 18 / 22;}
+    .snap-creditspreads{ grid-column: 5 / 9;   grid-row: 18 / 22;}
+    .snap-debtservice  { grid-column: 9 / 13;  grid-row: 18 / 22;}
+}
+
+/* Time-range toggle (GDP panel) */
+.range-toggle {
+    display: flex;
+    gap: 4px;
+    margin-bottom: var(--spacing-sm);
+}
+
+.range-btn {
+    padding: 3px 12px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    font-family: var(--font-sans);
+    color: var(--color-text-secondary);
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+    line-height: 1.8;
+}
+
+.range-btn:hover { background: #e2e8f0; color: var(--color-text-primary); }
+
+.range-btn.active {
+    background: var(--color-primary);
+    color: #ffffff;
+    border-color: var(--color-primary);
 }
 
 /* Accent tile — blue decorative card */
@@ -1158,8 +1194,8 @@ body {
         grid-row: auto;
     }
     .snap-inflation,
-    .snap-yield,
-    .snap-accent {
+    .snap-gdp,
+    .snap-yield {
         grid-column: span 2;
     }
     .panel-chart-wrap {
@@ -1172,8 +1208,8 @@ body {
         grid-template-columns: 1fr;
     }
     .snap-inflation,
-    .snap-yield,
-    .snap-accent {
+    .snap-gdp,
+    .snap-yield {
         grid-column: span 1;
     }
 }
