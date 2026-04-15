@@ -234,6 +234,38 @@
             line-height: 1.55;
         }
 
+        /* Time-range toggle buttons */
+        .db-range-toggle {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 0.75rem;
+        }
+
+        .db-range-btn {
+            padding: 4px 14px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            font-family: var(--font-sans);
+            color: var(--color-text-secondary);
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s, border-color 0.15s;
+            line-height: 1.8;
+        }
+
+        .db-range-btn:hover {
+            background: #e2e8f0;
+            color: var(--color-text-primary);
+        }
+
+        .db-range-btn.active {
+            background: var(--color-primary);
+            color: #ffffff;
+            border-color: var(--color-primary);
+        }
+
         /* Chart containers — half-width vs full-width panels */
         .db-chart-wrap {
             position: relative;
@@ -395,6 +427,11 @@
                     <p class="db-panel-updated" id="upd-gdp">Last updated: --</p>
                     <button class="db-hint-btn" data-panel="gdp">What is this?</button>
                     <p class="db-hint-text" id="hint-gdp" style="display:none">Real GDP growth measures the inflation-adjusted rate at which the U.S. economy expanded in a quarter, expressed as an annualized percentage. Recession-period bars are shaded red.</p>
+                    <div class="db-range-toggle" id="gdp-range-toggle">
+                        <button class="db-range-btn" data-years="1">1Y</button>
+                        <button class="db-range-btn" data-years="5">5Y</button>
+                        <button class="db-range-btn active" data-years="10">10Y</button>
+                    </div>
                     <div class="db-chart-wrap db-chart-wrap--lg">
                         <canvas id="chart-gdp"></canvas>
                     </div>

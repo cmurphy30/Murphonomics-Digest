@@ -8,7 +8,7 @@
  *   Table:     T10101 — "Percent Change From Preceding Period in Real GDP"
  *   Line 1:    Real GDP — the headline quarterly growth figure you see in the news
  *   Frequency: Quarterly
- *   Period:    Last 5 years
+ *   Period:    Last 10 years
  *
  * The value returned is the annualized % change from the prior quarter.
  * For example, "2.8" means the economy grew at an annualized rate of 2.8%.
@@ -31,10 +31,10 @@ exports.handler = async function (event, context) {
     }
 
     // BEA requires an explicit list of years rather than a date range
-    // Build a comma-separated list: current year and the 5 years before it
+    // Build a comma-separated list: current year and the 10 years before it
     const currentYear = new Date().getFullYear();
     const years = [];
-    for (let y = currentYear - 5; y <= currentYear; y++) {
+    for (let y = currentYear - 10; y <= currentYear; y++) {
         years.push(y);
     }
 

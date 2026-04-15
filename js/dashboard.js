@@ -256,50 +256,94 @@
 
     function renderGDP(bea, fred) {
         try {
-            const data   = (bea && bea.realGDP) || [];
-            const recSet = buildRecessionSet(fred && fred.recession);
-            const L      = latest(data);
+            const allData = (bea && bea.realGDP) || [];
+            const recSet  = buildRecessionSet(fred && fred.recession);
+            const L       = latest(allData);
 
-            setStats('gdp', L ? `${L.value.toFixed(1)}%` : '--', data, 1, true);
+            setStats('gdp', L ? `${L.value.toFixed(1)}%` : '--', allData, 1, true);
 
-            const bgColors = data.map(o => {
-                if (inRecession(o.date, recSet)) return 'rgba(239,68,68,0.45)';
-                return o.value >= 0 ? 'rgba(59,130,246,0.78)' : 'rgba(30,64,175,0.78)';
-            });
+            let gdpChart    = null;
+            let activeYears = 10;
 
-            const opts = baseOptions('%', true);
-            new Chart(document.getElementById('chart-gdp'), {
-                type: 'bar',
-                data: {
-                    labels:   data.map(o => fmtQtr(o.date)),
-                    datasets: [{
-                        label:           'Real GDP Growth (annualized, %)',
-                        data:            data.map(o => o.value),
-                        backgroundColor: bgColors,
-                        borderRadius:    3,
-                        borderWidth:     0
-                    }]
-                },
-                options: {
-                    ...opts,
-                    plugins: {
-                        ...opts.plugins,
-                        legend: {
-                            display: true,
-                            labels: {
-                                generateLabels: () => [
-                                    { text: 'Growth',      fillStyle: 'rgba(59,130,246,0.78)', strokeStyle: 'transparent', fontColor: C.gray },
-                                    { text: 'Contraction', fillStyle: 'rgba(30,64,175,0.78)',  strokeStyle: 'transparent', fontColor: C.gray },
-                                    { text: 'Recession',   fillStyle: 'rgba(239,68,68,0.45)',  strokeStyle: 'transparent', fontColor: C.gray }
-                                ],
-                                font: { family: "'Inter', sans-serif", size: 11 },
-                                boxWidth: 14,
-                                padding:  8
+            function getSlice(years) {
+                // GDP is quarterly — 4 quarters per year
+                return allData.slice(-(years * 4));
+            }
+
+            function buildColors(slice) {
+                return slice.map(o => {
+                    if (inRecession(o.date, recSet)) return 'rgba(239,68,68,0.45)';
+                    return o.value >= 0 ? 'rgba(59,130,246,0.78)' : 'rgba(30,64,175,0.78)';
+                });
+            }
+
+            function drawChart(years) {
+                const slice    = getSlice(years);
+                const bgColors = buildColors(slice);
+                const labels   = slice.map(o => fmtQtr(o.date));
+                const values   = slice.map(o => o.value);
+
+                // Update in place if chart already exists — no flicker
+                if (gdpChart) {
+                    gdpChart.data.labels                          = labels;
+                    gdpChart.data.datasets[0].data                = values;
+                    gdpChart.data.datasets[0].backgroundColor     = bgColors;
+                    gdpChart.update();
+                    return;
+                }
+
+                const opts = baseOptions('%', true);
+                gdpChart = new Chart(document.getElementById('chart-gdp'), {
+                    type: 'bar',
+                    data: {
+                        labels,
+                        datasets: [{
+                            label:           'Real GDP Growth (annualized, %)',
+                            data:            values,
+                            backgroundColor: bgColors,
+                            borderRadius:    3,
+                            borderWidth:     0
+                        }]
+                    },
+                    options: {
+                        ...opts,
+                        plugins: {
+                            ...opts.plugins,
+                            legend: {
+                                display: true,
+                                labels: {
+                                    generateLabels: () => [
+                                        { text: 'Growth',      fillStyle: 'rgba(59,130,246,0.78)', strokeStyle: 'transparent', fontColor: C.gray },
+                                        { text: 'Contraction', fillStyle: 'rgba(30,64,175,0.78)',  strokeStyle: 'transparent', fontColor: C.gray },
+                                        { text: 'Recession',   fillStyle: 'rgba(239,68,68,0.45)',  strokeStyle: 'transparent', fontColor: C.gray }
+                                    ],
+                                    font: { family: "'Inter', sans-serif", size: 11 },
+                                    boxWidth: 14,
+                                    padding:  8
+                                }
                             }
                         }
                     }
-                }
-            });
+                });
+            }
+
+            // Wire up the toggle buttons
+            const toggleEl = document.getElementById('gdp-range-toggle');
+            if (toggleEl) {
+                toggleEl.addEventListener('click', function (e) {
+                    const btn = e.target.closest('[data-years]');
+                    if (!btn) return;
+                    const years = parseInt(btn.dataset.years, 10);
+                    if (years === activeYears) return;
+                    activeYears = years;
+                    toggleEl.querySelectorAll('.db-range-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    drawChart(years);
+                });
+            }
+
+            drawChart(activeYears);
+
         } catch (err) {
             showPanelError('chart-gdp', err.message);
         }
