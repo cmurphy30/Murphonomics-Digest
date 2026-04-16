@@ -174,42 +174,86 @@
         };
     }
 
+    // ── Shared toggle wiring helper ────────────────────────────────────────
+
+    function wireToggle(toggleId, getActive, setActive, drawFn) {
+        const toggleEl = document.getElementById(toggleId);
+        if (!toggleEl) return;
+        toggleEl.addEventListener('click', function (e) {
+            const btn = e.target.closest('[data-years]');
+            if (!btn) return;
+            const years = parseInt(btn.dataset.years, 10);
+            if (years === getActive()) return;
+            setActive(years);
+            toggleEl.querySelectorAll('.range-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            drawFn(years);
+        });
+    }
+
     // ── Panel 1: Inflation Comparison ─────────────────────────────────────
     // Multi-line: Headline CPI YoY, Core CPI YoY, PCE YoY
     // Dashed reference line at 2% (Fed's inflation target)
 
     function renderInflation(bls, fred) {
-        const ref  = (bls && bls.headlineCPIYoY) || [];
-        const core = alignValues(ref, bls && bls.coreCPIYoY);
-        const pce  = alignValues(ref, fred && fred.pcepiyoy);
-        const L    = latest(ref);
+        const fullRef  = (bls && bls.headlineCPIYoY) || [];
+        const fullCore = alignValues(fullRef, bls && bls.coreCPIYoY);
+        const fullPce  = alignValues(fullRef, fred && fred.pcepiyoy);
+        const L        = latest(fullRef);
 
         document.getElementById('latestInflation').textContent =
             L ? `${L.value.toFixed(1)}% CPI` : '--';
         document.getElementById('updatedInflation').textContent =
             L ? `Last updated: ${fmtMonth(L.date)}` : 'Last updated: --';
 
-        const labels = ref.map(o => fmtMonth(o.date));
+        let chart       = null;
+        let activeYears = 5;
 
-        new Chart(document.getElementById('chartInflation'), {
-            type: 'line',
-            data: {
-                labels,
-                datasets: [
-                    lineDataset('Headline CPI', ref.map(o => o.value), C.red),
-                    lineDataset('Core CPI',     core,                  C.blue),
-                    lineDataset('PCE',          pce,                   C.green),
-                    // Dashed horizontal line at the Fed's 2% target
-                    lineDataset('Fed Target (2%)', labels.map(() => 2), C.amber, {
-                        borderDash:  [5, 4],
-                        borderWidth: 1.5,
-                        tension:     0,
-                        pointRadius: 0
-                    })
-                ]
-            },
-            options: baseOptions('%')
-        });
+        function draw(years) {
+            const n      = years * 12;
+            const ref    = fullRef.slice(-n);
+            // Slice the pre-aligned arrays by the same tail count
+            const refStart = fullRef.length - ref.length;
+            const core   = fullCore.slice(refStart);
+            const pce    = fullPce.slice(refStart);
+            const labels = ref.map(o => fmtMonth(o.date));
+
+            if (chart) {
+                chart.data.labels              = labels;
+                chart.data.datasets[0].data    = ref.map(o => o.value);
+                chart.data.datasets[1].data    = core;
+                chart.data.datasets[2].data    = pce;
+                chart.data.datasets[3].data    = labels.map(() => 2);
+                chart.update();
+                return;
+            }
+
+            chart = new Chart(document.getElementById('chartInflation'), {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [
+                        lineDataset('Headline CPI', ref.map(o => o.value), C.red),
+                        lineDataset('Core CPI',     core,                  C.blue),
+                        lineDataset('PCE',          pce,                   C.green),
+                        lineDataset('Fed Target (2%)', labels.map(() => 2), C.amber, {
+                            borderDash:  [5, 4],
+                            borderWidth: 1.5,
+                            tension:     0,
+                            pointRadius: 0
+                        })
+                    ]
+                },
+                options: baseOptions('%')
+            });
+        }
+
+        wireToggle('inflation-range-toggle',
+            () => activeYears,
+            v  => { activeYears = v; },
+            draw
+        );
+        draw(activeYears);
     }
 
     // ── Panel 2: Real vs. Nominal Wage Growth ─────────────────────────────
@@ -217,88 +261,156 @@
     // Fill between the lines makes the gap visually obvious
 
     function renderWages(bls) {
-        // avgHourlyEarnings comes as a dollar level — calculate YoY % change
-        const nominalYoY = computeYoY(bls && bls.avgHourlyEarnings);
-        const realYoY    = (bls && bls.realWageGrowth) || [];
-        const realAligned = alignValues(nominalYoY, realYoY);
-        const L = latest(nominalYoY);
+        const fullNominal = computeYoY(bls && bls.avgHourlyEarnings);
+        const realYoY     = (bls && bls.realWageGrowth) || [];
+        const fullAligned = alignValues(fullNominal, realYoY);
+        const L           = latest(fullNominal);
 
         document.getElementById('latestWages').textContent =
             L ? `${L.value.toFixed(1)}% nominal` : '--';
         document.getElementById('updatedWages').textContent =
             L ? `Last updated: ${fmtMonth(L.date)}` : 'Last updated: --';
 
-        new Chart(document.getElementById('chartWages'), {
-            type: 'line',
-            data: {
-                labels: nominalYoY.map(o => fmtMonth(o.date)),
-                datasets: [
-                    lineDataset('Nominal Wage Growth', nominalYoY.map(o => o.value), C.blue),
-                    // Fill between the two lines: red gap means inflation outpacing paychecks
-                    lineDataset('Real Wage Growth', realAligned, C.green, {
-                        fill: {
-                            target: '-1',                          // fill against prior dataset (nominal)
-                            below:  'rgba(239,68,68,0.12)',        // red = inflation eating wages
-                            above:  'rgba(16,185,129,0.10)'        // green = wages beating inflation
-                        }
-                    })
-                ]
-            },
-            options: baseOptions('%')
-        });
+        let chart       = null;
+        let activeYears = 5;
+
+        function draw(years) {
+            const n      = years * 12;
+            const nom    = fullNominal.slice(-n);
+            const start  = fullNominal.length - nom.length;
+            const real   = fullAligned.slice(start);
+            const labels = nom.map(o => fmtMonth(o.date));
+
+            if (chart) {
+                chart.data.labels           = labels;
+                chart.data.datasets[0].data = nom.map(o => o.value);
+                chart.data.datasets[1].data = real;
+                chart.update();
+                return;
+            }
+
+            chart = new Chart(document.getElementById('chartWages'), {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [
+                        lineDataset('Nominal Wage Growth', nom.map(o => o.value), C.blue),
+                        lineDataset('Real Wage Growth', real, C.green, {
+                            fill: {
+                                target: '-1',
+                                below:  'rgba(239,68,68,0.12)',
+                                above:  'rgba(16,185,129,0.10)'
+                            }
+                        })
+                    ]
+                },
+                options: baseOptions('%')
+            });
+        }
+
+        wireToggle('wages-range-toggle',
+            () => activeYears,
+            v  => { activeYears = v; },
+            draw
+        );
+        draw(activeYears);
     }
 
     // ── Panel 3: U.S. Dollar Index (DXY) ─────────────────────────────────────
     // Daily series collapsed to monthly — higher = stronger dollar
 
     function renderDollarIndex(fred) {
-        const raw     = toMonthlyLast((fred && fred.dollarIndex) || []);
-        const L       = latest(raw);
+        const fullRaw = toMonthlyLast((fred && fred.dollarIndex) || []);
+        const L       = latest(fullRaw);
 
         document.getElementById('latestDollarIndex').textContent =
             L ? L.value.toFixed(1) : '--';
         document.getElementById('updatedDollarIndex').textContent =
             L ? `Last updated: ${fmtMonth(L.date)}` : 'Last updated: --';
 
-        const labels = raw.map(o => fmtMonth(o.date));
+        let chart       = null;
+        let activeYears = 5;
 
-        new Chart(document.getElementById('chartDollarIndex'), {
-            type: 'line',
-            data: {
-                labels,
-                datasets: [
-                    lineDataset('DXY', raw.map(o => o.value), C.primary, {
-                        fill: { target: 'origin', above: 'rgba(30,64,175,0.06)' }
-                    })
-                ]
-            },
-            options: baseOptions('')
-        });
+        function draw(years) {
+            const raw    = fullRaw.slice(-years * 12);
+            const labels = raw.map(o => fmtMonth(o.date));
+            const values = raw.map(o => o.value);
+
+            if (chart) {
+                chart.data.labels           = labels;
+                chart.data.datasets[0].data = values;
+                chart.update();
+                return;
+            }
+
+            chart = new Chart(document.getElementById('chartDollarIndex'), {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [
+                        lineDataset('DXY', values, C.primary, {
+                            fill: { target: 'origin', above: 'rgba(30,64,175,0.06)' }
+                        })
+                    ]
+                },
+                options: baseOptions('')
+            });
+        }
+
+        wireToggle('dxy-range-toggle',
+            () => activeYears,
+            v  => { activeYears = v; },
+            draw
+        );
+        draw(activeYears);
     }
 
     // ── Panel 4: Fed Funds Rate ────────────────────────────────────────────
 
     function renderFed(fred) {
-        const fedRaw = (fred && fred.fedfunds) || [];
-        const L      = latest(fedRaw);
+        const fullRaw = (fred && fred.fedfunds) || [];
+        const L       = latest(fullRaw);
 
         document.getElementById('latestFed').textContent =
             L ? `${L.value.toFixed(2)}% fed funds` : '--';
         document.getElementById('updatedFed').textContent =
             L ? `Last updated: ${fmtMonth(L.date)}` : 'Last updated: --';
 
-        new Chart(document.getElementById('chartFed'), {
-            type: 'line',
-            data: {
-                labels: fedRaw.map(o => fmtMonth(o.date)),
-                datasets: [
-                    lineDataset('Fed Funds Rate', fedRaw.map(o => o.value), C.primary, {
-                        fill: { target: 'origin', above: 'rgba(30,64,175,0.06)' }
-                    })
-                ]
-            },
-            options: baseOptions('%')
-        });
+        let chart       = null;
+        let activeYears = 5;
+
+        function draw(years) {
+            const raw    = fullRaw.slice(-years * 12);
+            const labels = raw.map(o => fmtMonth(o.date));
+            const values = raw.map(o => o.value);
+
+            if (chart) {
+                chart.data.labels           = labels;
+                chart.data.datasets[0].data = values;
+                chart.update();
+                return;
+            }
+
+            chart = new Chart(document.getElementById('chartFed'), {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [
+                        lineDataset('Fed Funds Rate', values, C.primary, {
+                            fill: { target: 'origin', above: 'rgba(30,64,175,0.06)' }
+                        })
+                    ]
+                },
+                options: baseOptions('%')
+            });
+        }
+
+        wireToggle('fed-range-toggle',
+            () => activeYears,
+            v  => { activeYears = v; },
+            draw
+        );
+        draw(activeYears);
     }
 
     // ── Panel 5: Shiller CAPE Ratio ────────────────────────────────────────
@@ -307,37 +419,57 @@
     const CAPE_HIST_AVG = 16.8;
 
     function renderCAPE(fred) {
-        const capeData = (fred && fred.cape) || [];
-        const L = latest(capeData);
+        const fullData = (fred && fred.cape) || [];
+        const L        = latest(fullData);
 
         document.getElementById('latestCAPE').textContent =
             L ? L.value.toFixed(1) : '--';
         document.getElementById('updatedCAPE').textContent =
             L ? `Last updated: ${fmtMonth(L.date)}` : 'Last updated: --';
 
-        const labels = capeData.map(o => fmtMonth(o.date));
+        let chart       = null;
+        let activeYears = 5;
 
-        new Chart(document.getElementById('chartCAPE'), {
-            type: 'line',
-            data: {
-                labels,
-                datasets: [
-                    lineDataset('CAPE Ratio', capeData.map(o => o.value), C.primary, {
-                        // Shade above historical avg red — signals elevated valuations
-                        fill: { target: { value: CAPE_HIST_AVG }, above: 'rgba(239,68,68,0.08)' }
-                    }),
-                    // Dashed horizontal reference line at historical average
-                    lineDataset(`Hist. Avg (${CAPE_HIST_AVG})`, labels.map(() => CAPE_HIST_AVG), C.amber, {
-                        borderDash:  [5, 4],
-                        borderWidth: 1.5,
-                        tension:     0,
-                        pointRadius: 0,
-                        fill:        false
-                    })
-                ]
-            },
-            options: baseOptions('')
-        });
+        function draw(years) {
+            const data   = fullData.slice(-years * 12);
+            const labels = data.map(o => fmtMonth(o.date));
+            const values = data.map(o => o.value);
+
+            if (chart) {
+                chart.data.labels           = labels;
+                chart.data.datasets[0].data = values;
+                chart.data.datasets[1].data = labels.map(() => CAPE_HIST_AVG);
+                chart.update();
+                return;
+            }
+
+            chart = new Chart(document.getElementById('chartCAPE'), {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [
+                        lineDataset('CAPE Ratio', values, C.primary, {
+                            fill: { target: { value: CAPE_HIST_AVG }, above: 'rgba(239,68,68,0.08)' }
+                        }),
+                        lineDataset(`Hist. Avg (${CAPE_HIST_AVG})`, labels.map(() => CAPE_HIST_AVG), C.amber, {
+                            borderDash:  [5, 4],
+                            borderWidth: 1.5,
+                            tension:     0,
+                            pointRadius: 0,
+                            fill:        false
+                        })
+                    ]
+                },
+                options: baseOptions('')
+            });
+        }
+
+        wireToggle('cape-range-toggle',
+            () => activeYears,
+            v  => { activeYears = v; },
+            draw
+        );
+        draw(activeYears);
     }
 
     // ── Panel 6: Real GDP Growth (with 1Y / 5Y / 10Y toggle) ─────────────
@@ -431,31 +563,155 @@
         drawChart(activeYears);
     }
 
+    // ── Panel 7: 10Y–2Y Yield Curve Spread ────────────────────────────────
+    // Fill below zero in red — an inverted curve historically precedes recessions
+
+    function renderYieldCurve(fred) {
+        const fullRaw = toMonthlyLast((fred && fred.yieldCurveSpread) || []);
+        const L       = latest(fullRaw);
+
+        document.getElementById('latestYieldCurve').textContent =
+            L ? `${L.value.toFixed(2)}%` : '--';
+        document.getElementById('updatedYieldCurve').textContent =
+            L ? `Last updated: ${fmtMonth(L.date)}` : 'Last updated: --';
+
+        let chart       = null;
+        let activeYears = 5;
+
+        function draw(years) {
+            const raw    = fullRaw.slice(-years * 12);
+            const labels = raw.map(o => fmtMonth(o.date));
+            const values = raw.map(o => o.value);
+
+            if (chart) {
+                chart.data.labels           = labels;
+                chart.data.datasets[0].data = values;
+                chart.update();
+                return;
+            }
+
+            chart = new Chart(document.getElementById('chartYieldCurve'), {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [
+                        lineDataset('10Y–2Y Spread', values, C.blue, {
+                            fill: { target: { value: 0 }, below: 'rgba(239,68,68,0.13)', above: 'rgba(16,185,129,0.08)' }
+                        })
+                    ]
+                },
+                options: baseOptions('%')
+            });
+        }
+
+        wireToggle('yield-range-toggle',
+            () => activeYears,
+            v  => { activeYears = v; },
+            draw
+        );
+        draw(activeYears);
+    }
+
+    // ── Panel 8: Labor Force Participation Rate ────────────────────────────
+    // Monthly BLS series — % of working-age population employed or actively seeking work
+
+    function renderLFPR(bls) {
+        const fullRaw = (bls && bls.lfpr) || [];
+        const L       = latest(fullRaw);
+
+        document.getElementById('latestLFPR').textContent =
+            L ? `${L.value.toFixed(1)}%` : '--';
+        document.getElementById('updatedLFPR').textContent =
+            L ? `Last updated: ${fmtMonth(L.date)}` : 'Last updated: --';
+
+        let chart       = null;
+        let activeYears = 5;
+
+        function draw(years) {
+            const raw    = fullRaw.slice(-years * 12);
+            const labels = raw.map(o => fmtMonth(o.date));
+            const values = raw.map(o => o.value);
+
+            if (chart) {
+                chart.data.labels           = labels;
+                chart.data.datasets[0].data = values;
+                chart.update();
+                return;
+            }
+
+            chart = new Chart(document.getElementById('chartLFPR'), {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [
+                        lineDataset('LFPR', values, C.green, {
+                            fill: { target: 'origin', above: 'rgba(16,185,129,0.06)' }
+                        })
+                    ]
+                },
+                options: baseOptions('%')
+            });
+        }
+
+        wireToggle('lfpr-range-toggle',
+            () => activeYears,
+            v  => { activeYears = v; },
+            draw
+        );
+        draw(activeYears);
+    }
+
     // ── Panel 9: Real Yield & Breakeven Inflation ─────────────────────────
     // 10-year TIPS real yield vs. market-implied breakeven inflation expectation
 
     function renderRealYield(fred) {
-        const realYield = toMonthlyLast((fred && fred.realYield10y)       || []);
-        const breakeven = toMonthlyLast((fred && fred.breakevenInflation) || []);
-        const aligned   = alignValues(realYield, breakeven);
-        const L         = latest(realYield);
+        const fullRealYield = toMonthlyLast((fred && fred.realYield10y)       || []);
+        const fullBreakeven = toMonthlyLast((fred && fred.breakevenInflation) || []);
+        const fullAligned   = alignValues(fullRealYield, fullBreakeven);
+        const L             = latest(fullRealYield);
 
         document.getElementById('latestRealYield').textContent =
             L ? `${L.value.toFixed(2)}% real` : '--';
         document.getElementById('updatedRealYield').textContent =
             L ? `Last updated: ${fmtMonth(L.date)}` : 'Last updated: --';
 
-        new Chart(document.getElementById('chartRealYield'), {
-            type: 'line',
-            data: {
-                labels:   realYield.map(o => fmtMonth(o.date)),
-                datasets: [
-                    lineDataset('10Y Real Yield (TIPS)',        realYield.map(o => o.value), C.primary),
-                    lineDataset('Breakeven Inflation (10Y)', aligned,                        C.amber)
-                ]
-            },
-            options: baseOptions('%')
-        });
+        let chart       = null;
+        let activeYears = 5;
+
+        function draw(years) {
+            const n         = years * 12;
+            const realYield = fullRealYield.slice(-n);
+            const start     = fullRealYield.length - realYield.length;
+            const aligned   = fullAligned.slice(start);
+            const labels    = realYield.map(o => fmtMonth(o.date));
+
+            if (chart) {
+                chart.data.labels           = labels;
+                chart.data.datasets[0].data = realYield.map(o => o.value);
+                chart.data.datasets[1].data = aligned;
+                chart.update();
+                return;
+            }
+
+            chart = new Chart(document.getElementById('chartRealYield'), {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [
+                        lineDataset('10Y Real Yield (TIPS)',     realYield.map(o => o.value), C.primary),
+                        lineDataset('Breakeven Inflation (10Y)', aligned,                     C.amber)
+                    ]
+                },
+                options: baseOptions('%')
+            });
+        }
+
+        wireToggle('realyield-range-toggle',
+            () => activeYears,
+            v  => { activeYears = v; },
+            draw
+        );
+        draw(activeYears);
     }
 
     // ── Panel 10: Credit Spreads (OAS) ────────────────────────────────────
@@ -463,10 +719,10 @@
     // Periods where HY OAS > 600 bps are shaded red (market stress signal)
 
     function renderCreditSpreads(fred) {
-        const igMonthly = toMonthlyLast((fred && fred.igSpread) || []);
-        const hyMonthly = toMonthlyLast((fred && fred.hySpread) || []);
-        const igAligned = alignValues(hyMonthly, igMonthly);
-        const L         = latest(hyMonthly);
+        const fullHy      = toMonthlyLast((fred && fred.hySpread) || []);
+        const fullIg      = toMonthlyLast((fred && fred.igSpread) || []);
+        const fullIgAlign = alignValues(fullHy, fullIg);
+        const L           = latest(fullHy);
 
         document.getElementById('latestCreditSpreads').textContent =
             L ? `${L.value.toFixed(0)} bps HY` : '--';
@@ -475,21 +731,22 @@
 
         const HY_STRESS = 600;
 
-        // Shade periods where HY OAS > 600 bps in light red (stress signal)
+        // Mutable reference so the plugin always reads the current slice
+        let currentHyValues = [];
+
         const stressPlugin = {
             id: 'hy-stress',
             afterDraw(chart) {
                 const meta = chart.getDatasetMeta(1);
                 if (!meta.data.length) return;
                 const ctx = chart.ctx, area = chart.chartArea;
-                const hyValues = hyMonthly.map(o => o.value);
                 let inStress = false, startX = null;
                 ctx.save();
                 ctx.beginPath();
                 ctx.rect(area.left, area.top, area.width, area.height);
                 ctx.clip();
                 meta.data.forEach((point, i) => {
-                    const above = hyValues[i] > HY_STRESS;
+                    const above = currentHyValues[i] > HY_STRESS;
                     if (above && !inStress) { inStress = true; startX = point.x; }
                     else if (!above && inStress) {
                         inStress = false;
@@ -506,100 +763,99 @@
             }
         };
 
-        const opts = baseOptions(' bps');
-        opts.plugins.tooltip.callbacks.label = ctx => {
-            const v = ctx.parsed.y;
-            return ` ${ctx.dataset.label}: ${v != null ? v.toFixed(0) + ' bps' : '—'}`;
-        };
+        let chart       = null;
+        let activeYears = 5;
 
-        new Chart(document.getElementById('chartCreditSpreads'), {
-            type: 'line',
-            data: {
-                labels:   hyMonthly.map(o => fmtMonth(o.date)),
-                datasets: [
-                    lineDataset('Investment Grade OAS', igAligned,                   C.blue),
-                    lineDataset('High Yield OAS',       hyMonthly.map(o => o.value), C.red)
-                ]
-            },
-            options: opts,
-            plugins:  [stressPlugin]
-        });
+        function draw(years) {
+            const n      = years * 12;
+            const hy     = fullHy.slice(-n);
+            const start  = fullHy.length - hy.length;
+            const ig     = fullIgAlign.slice(start);
+            currentHyValues = hy.map(o => o.value);
+            const labels = hy.map(o => fmtMonth(o.date));
+
+            if (chart) {
+                chart.data.labels           = labels;
+                chart.data.datasets[0].data = ig;
+                chart.data.datasets[1].data = currentHyValues;
+                chart.update();
+                return;
+            }
+
+            const opts = baseOptions(' bps');
+            opts.plugins.tooltip.callbacks.label = ctx => {
+                const v = ctx.parsed.y;
+                return ` ${ctx.dataset.label}: ${v != null ? v.toFixed(0) + ' bps' : '—'}`;
+            };
+
+            chart = new Chart(document.getElementById('chartCreditSpreads'), {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [
+                        lineDataset('Investment Grade OAS', ig,              C.blue),
+                        lineDataset('High Yield OAS',       currentHyValues, C.red)
+                    ]
+                },
+                options: opts,
+                plugins:  [stressPlugin]
+            });
+        }
+
+        wireToggle('creditspreads-range-toggle',
+            () => activeYears,
+            v  => { activeYears = v; },
+            draw
+        );
+        draw(activeYears);
     }
 
     // ── Panel 11: Household Debt Service Ratio ────────────────────────────
     // % of disposable income going to debt payments — rising = consumer stress
 
     function renderDebtService(fred) {
-        const data = (fred && fred.debtServiceRatio) || [];
-        const L    = latest(data);
+        const fullData = (fred && fred.debtServiceRatio) || [];
+        const L        = latest(fullData);
 
         document.getElementById('latestDebtService').textContent =
             L ? `${L.value.toFixed(2)}%` : '--';
         document.getElementById('updatedDebtService').textContent =
             L ? `Last updated: ${fmtMonth(L.date)}` : 'Last updated: --';
 
-        new Chart(document.getElementById('chartDebtService'), {
-            type: 'line',
-            data: {
-                labels:   data.map(o => fmtMonth(o.date)),
-                datasets: [lineDataset('Debt Service Ratio', data.map(o => o.value), C.blue, {
-                    fill: { target: 'origin', above: 'rgba(59,130,246,0.06)' }
-                })]
-            },
-            options: baseOptions('%')
-        });
-    }
+        let chart       = null;
+        let activeYears = 5;
 
-    // ── Panel 7: 10Y–2Y Yield Curve Spread ────────────────────────────────
-    // Fill below zero in red — an inverted curve historically precedes recessions
+        function draw(years) {
+            // Debt Service Ratio is quarterly — 4 observations per year
+            const data   = fullData.slice(-years * 4);
+            const labels = data.map(o => fmtMonth(o.date));
+            const values = data.map(o => o.value);
 
-    function renderYieldCurve(fred) {
-        const raw = toMonthlyLast((fred && fred.yieldCurveSpread) || []);
-        const L   = latest(raw);
+            if (chart) {
+                chart.data.labels           = labels;
+                chart.data.datasets[0].data = values;
+                chart.update();
+                return;
+            }
 
-        document.getElementById('latestYieldCurve').textContent =
-            L ? `${L.value.toFixed(2)}%` : '--';
-        document.getElementById('updatedYieldCurve').textContent =
-            L ? `Last updated: ${fmtMonth(L.date)}` : 'Last updated: --';
+            chart = new Chart(document.getElementById('chartDebtService'), {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [lineDataset('Debt Service Ratio', values, C.blue, {
+                        fill: { target: 'origin', above: 'rgba(59,130,246,0.06)' }
+                    })]
+                },
+                options: baseOptions('%')
+            });
+        }
 
-        new Chart(document.getElementById('chartYieldCurve'), {
-            type: 'line',
-            data: {
-                labels: raw.map(o => fmtMonth(o.date)),
-                datasets: [
-                    lineDataset('10Y–2Y Spread', raw.map(o => o.value), C.blue, {
-                        fill: { target: { value: 0 }, below: 'rgba(239,68,68,0.13)', above: 'rgba(16,185,129,0.08)' }
-                    })
-                ]
-            },
-            options: baseOptions('%')
-        });
-    }
-
-    // ── Panel 7: Labor Force Participation Rate ────────────────────────────
-    // Monthly BLS series — % of working-age population employed or actively seeking work
-
-    function renderLFPR(bls) {
-        const raw = (bls && bls.lfpr) || [];
-        const L   = latest(raw);
-
-        document.getElementById('latestLFPR').textContent =
-            L ? `${L.value.toFixed(1)}%` : '--';
-        document.getElementById('updatedLFPR').textContent =
-            L ? `Last updated: ${fmtMonth(L.date)}` : 'Last updated: --';
-
-        new Chart(document.getElementById('chartLFPR'), {
-            type: 'line',
-            data: {
-                labels: raw.map(o => fmtMonth(o.date)),
-                datasets: [
-                    lineDataset('LFPR', raw.map(o => o.value), C.green, {
-                        fill: { target: 'origin', above: 'rgba(16,185,129,0.06)' }
-                    })
-                ]
-            },
-            options: baseOptions('%')
-        });
+        wireToggle('debtservice-range-toggle',
+            () => activeYears,
+            v  => { activeYears = v; },
+            draw
+        );
+        draw(activeYears);
     }
 
     // ── Summary block ──────────────────────────────────────────────────────
@@ -616,10 +872,16 @@
             return;
         }
 
-        // Show the month label (e.g. "April 2025") if it exists in the response.
-        // Older cached summaries may not have this field — handle gracefully.
+        // Show the published date below the title
         if (monthEl) {
-            monthEl.textContent = summaryData.month || '';
+            if (summaryData.generatedAt) {
+                const d = new Date(summaryData.generatedAt);
+                monthEl.textContent = 'Published ' + d.toLocaleDateString('en-US', {
+                    month: 'long', day: 'numeric', year: 'numeric'
+                });
+            } else if (summaryData.month) {
+                monthEl.textContent = summaryData.month;
+            }
         }
 
         // The summary arrives as plain text with paragraph breaks — wrap each in <p>
@@ -697,7 +959,6 @@
     async function initSnapshot() {
         const loadingEl = document.getElementById('snapshotLoading');
         const gridEl    = document.getElementById('snapshotGrid');
-        const summaryEl = document.getElementById('snapshotSummaryBlock');
 
         try {
             // getData() is defined in data-service.js — fetches from all Netlify functions,

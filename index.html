@@ -100,7 +100,7 @@
 
         <!-- AI-generated written summary -->
         <div class="snapshot-summary-block" id="snapshotSummaryBlock">
-            <h3>Murphonomics Economic Summary</h3>
+            <h3>The economy at a glance</h3>
             <!-- Month label populated by snapshot.js -->
             <p class="summary-month" id="summaryMonth"></p>
             <!-- Collapsible wrapper — max-height set by JS after content loads -->
@@ -157,6 +157,10 @@
                 <p class="panel-title">Inflation Comparison</p>
                 <p class="panel-latest-value" id="latestInflation">--</p>
                 <p class="panel-updated" id="updatedInflation">Last updated: --</p>
+                <div class="range-toggle" id="inflation-range-toggle">
+                    <button class="range-btn" data-years="1">1Y</button>
+                    <button class="range-btn active" data-years="5">5Y</button>
+                </div>
                 <div class="panel-chart-wrap">
                     <canvas id="chartInflation"></canvas>
                 </div>
@@ -182,6 +186,10 @@
                 <p class="panel-title">Real vs. Nominal Wage Growth</p>
                 <p class="panel-latest-value" id="latestWages">--</p>
                 <p class="panel-updated" id="updatedWages">Last updated: --</p>
+                <div class="range-toggle" id="wages-range-toggle">
+                    <button class="range-btn" data-years="1">1Y</button>
+                    <button class="range-btn active" data-years="5">5Y</button>
+                </div>
                 <div class="panel-chart-wrap">
                     <canvas id="chartWages"></canvas>
                 </div>
@@ -192,6 +200,10 @@
                 <p class="panel-title">Labor Force Participation Rate</p>
                 <p class="panel-latest-value" id="latestLFPR">--</p>
                 <p class="panel-updated" id="updatedLFPR">Last updated: --</p>
+                <div class="range-toggle" id="lfpr-range-toggle">
+                    <button class="range-btn" data-years="1">1Y</button>
+                    <button class="range-btn active" data-years="5">5Y</button>
+                </div>
                 <div class="panel-chart-wrap">
                     <canvas id="chartLFPR"></canvas>
                 </div>
@@ -202,6 +214,10 @@
                 <p class="panel-title">10Y–2Y Yield Curve Spread</p>
                 <p class="panel-latest-value" id="latestYieldCurve">--</p>
                 <p class="panel-updated" id="updatedYieldCurve">Last updated: --</p>
+                <div class="range-toggle" id="yield-range-toggle">
+                    <button class="range-btn" data-years="1">1Y</button>
+                    <button class="range-btn active" data-years="5">5Y</button>
+                </div>
                 <div class="panel-chart-wrap">
                     <canvas id="chartYieldCurve"></canvas>
                 </div>
@@ -212,6 +228,10 @@
                 <p class="panel-title">Fed Funds Rate</p>
                 <p class="panel-latest-value" id="latestFed">--</p>
                 <p class="panel-updated" id="updatedFed">Last updated: --</p>
+                <div class="range-toggle" id="fed-range-toggle">
+                    <button class="range-btn" data-years="1">1Y</button>
+                    <button class="range-btn active" data-years="5">5Y</button>
+                </div>
                 <div class="panel-chart-wrap">
                     <canvas id="chartFed"></canvas>
                 </div>
@@ -222,6 +242,10 @@
                 <p class="panel-title">Real Yield &amp; Breakeven Inflation</p>
                 <p class="panel-latest-value" id="latestRealYield">--</p>
                 <p class="panel-updated" id="updatedRealYield">Last updated: --</p>
+                <div class="range-toggle" id="realyield-range-toggle">
+                    <button class="range-btn" data-years="1">1Y</button>
+                    <button class="range-btn active" data-years="5">5Y</button>
+                </div>
                 <div class="panel-chart-wrap">
                     <canvas id="chartRealYield"></canvas>
                 </div>
@@ -232,6 +256,10 @@
                 <p class="panel-title">Shiller CAPE Ratio</p>
                 <p class="panel-latest-value" id="latestCAPE">--</p>
                 <p class="panel-updated" id="updatedCAPE">Last updated: --</p>
+                <div class="range-toggle" id="cape-range-toggle">
+                    <button class="range-btn" data-years="1">1Y</button>
+                    <button class="range-btn active" data-years="5">5Y</button>
+                </div>
                 <div class="panel-chart-wrap">
                     <canvas id="chartCAPE"></canvas>
                 </div>
@@ -242,6 +270,10 @@
                 <p class="panel-title">U.S. Dollar Index (DXY)</p>
                 <p class="panel-latest-value" id="latestDollarIndex">--</p>
                 <p class="panel-updated" id="updatedDollarIndex">Last updated: --</p>
+                <div class="range-toggle" id="dxy-range-toggle">
+                    <button class="range-btn" data-years="1">1Y</button>
+                    <button class="range-btn active" data-years="5">5Y</button>
+                </div>
                 <div class="panel-chart-wrap">
                     <canvas id="chartDollarIndex"></canvas>
                 </div>
@@ -252,6 +284,10 @@
                 <p class="panel-title">Credit Spreads (OAS)</p>
                 <p class="panel-latest-value" id="latestCreditSpreads">--</p>
                 <p class="panel-updated" id="updatedCreditSpreads">Last updated: --</p>
+                <div class="range-toggle" id="creditspreads-range-toggle">
+                    <button class="range-btn" data-years="1">1Y</button>
+                    <button class="range-btn active" data-years="5">5Y</button>
+                </div>
                 <div class="panel-chart-wrap">
                     <canvas id="chartCreditSpreads"></canvas>
                 </div>
@@ -262,6 +298,10 @@
                 <p class="panel-title">Household Debt Service Ratio</p>
                 <p class="panel-latest-value" id="latestDebtService">--</p>
                 <p class="panel-updated" id="updatedDebtService">Last updated: --</p>
+                <div class="range-toggle" id="debtservice-range-toggle">
+                    <button class="range-btn" data-years="1">1Y</button>
+                    <button class="range-btn active" data-years="5">5Y</button>
+                </div>
                 <div class="panel-chart-wrap">
                     <canvas id="chartDebtService"></canvas>
                 </div>

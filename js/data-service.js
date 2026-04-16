@@ -52,7 +52,7 @@ const DATA_SOURCES = [
         label:    'Bureau of Labor Statistics data'
     },
     {
-        key:      'bea',
+        key:      'bea_v2',
         endpoint: '/.netlify/functions/bea-data',
         label:    'Bureau of Economic Analysis data'
     }
