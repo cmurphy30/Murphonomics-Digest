@@ -885,7 +885,10 @@
         }
 
         // The summary arrives as plain text with paragraph breaks — wrap each in <p>
-        const html = summaryData.summary
+        // Strip any leading bold title Claude may have added (e.g. "**June 2025 — ...**")
+        const cleanedSummary = summaryData.summary
+            .replace(/^\s*\*\*[^*]+\*\*\s*\n?/, '');
+        const html = cleanedSummary
             .split(/\n{2,}/)
             .filter(p => p.trim())
             .map(p => `<p>${p.trim()}</p>`)

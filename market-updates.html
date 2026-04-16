@@ -246,8 +246,9 @@
                 const heading = summary.month
                     || new Date(summary.generatedAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 
-                // Body: split on double newlines and wrap each paragraph
+                // Body: strip any leading bold title, split on double newlines, wrap each paragraph
                 const bodyHtml = (summary.summary || '')
+                    .replace(/^\s*\*\*[^*]+\*\*\s*\n?/, '')
                     .split(/\n{2,}/)
                     .filter(p => p.trim())
                     .map(p => `<p>${p.trim()}</p>`)

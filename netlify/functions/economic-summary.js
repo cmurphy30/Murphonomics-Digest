@@ -159,7 +159,7 @@ exports.handler = async function (event, context) {
 
 ${dataText}
 
-Include specific numbers. Do not use bullet points — write in full paragraphs.`
+Include specific numbers. Do not use bullet points — write in full paragraphs. Do not include a title, heading, or date at the start — begin directly with the first paragraph.`
                     }
                 ]
             })
