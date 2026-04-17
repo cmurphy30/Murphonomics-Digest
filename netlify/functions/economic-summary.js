@@ -141,25 +141,26 @@ exports.handler = async function (event, context) {
             },
             body: JSON.stringify({
                 model:      'claude-sonnet-4-6',
-                // 1500 tokens gives comfortable headroom for a 500–700 word response
-                // (700 words ≈ 900 tokens; 1024 was too tight and risked truncation)
-                max_tokens: 1500,
+                // 2000 tokens: ~1200 for the main summary + ~800 for three blurbs
+                max_tokens: 2000,
 
                 system: `You are an economics writer for Murphonomics, a personal economics blog. Write in a voice that is analytical but accessible — serious and data-driven, but never jargon-heavy. Your reader is intelligent but not an economist.`,
 
                 messages: [
                     {
                         role:    'user',
-                        content: `Using the following current economic data, write a 500–700 word economic summary structured in four paragraphs:
+                        content: `Using the following current economic data, write an economic summary and three short panel insights.
 
-1. Headline macro picture (GDP + inflation + labor market)
-2. Monetary policy and credit market context (Fed rate, yield curve, real yields, credit spreads)
-3. Markets and asset prices (CAPE, DXY, breakeven inflation)
-4. What this means for workers and wages (real purchasing power, debt service ratio)
+Return your response as a JSON object with exactly these four keys:
+
+- "summary": a 500–700 word summary in four paragraphs (1. GDP/inflation/labor market, 2. monetary policy and credit markets, 3. markets and asset prices, 4. wages and purchasing power). No title, heading, or date — begin directly with the first paragraph.
+- "cpiBlurb": 2–3 sentences describing the current CPI trend and what it means for consumers. Be specific with numbers.
+- "lfprBlurb": 2–3 sentences describing the current Labor Force Participation Rate and what's driving it. Be specific with numbers.
+- "dxyBlurb": 2–3 sentences describing what's happening with the US Dollar Index and why it matters for the economy. Be specific with numbers.
 
 ${dataText}
 
-Include specific numbers. Do not use bullet points — write in full paragraphs. Do not include a title, heading, or date at the start — begin directly with the first paragraph.`
+Return only valid JSON. No markdown code fences. No bullet points anywhere.`
                     }
                 ]
             })
@@ -182,7 +183,23 @@ Include specific numbers. Do not use bullet points — write in full paragraphs.
             throw new Error('Claude returned an unexpected response shape — no content[0].text found');
         }
 
-        const summaryText = claudeJson.content[0].text;
+        const rawText = claudeJson.content[0].text;
+
+        // Parse JSON response — strip markdown code fences if Claude added them
+        let parsed;
+        try {
+            const cleaned = rawText.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/i, '').trim();
+            parsed = JSON.parse(cleaned);
+        } catch (parseErr) {
+            console.warn('[economic-summary] JSON parse failed, using raw text as summary:', parseErr.message);
+            parsed = { summary: rawText };
+        }
+
+        const summaryText = parsed.summary || rawText;
+        const cpiBlurb    = parsed.cpiBlurb  || '';
+        const lfprBlurb   = parsed.lfprBlurb || '';
+        const dxyBlurb    = parsed.dxyBlurb  || '';
+
         const now         = new Date();
         const generatedAt = now.toISOString();
 
@@ -207,7 +224,7 @@ Include specific numbers. Do not use bullet points — write in full paragraphs.
                 {
                     method:  'PUT',
                     headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-                    body:    JSON.stringify({ summary: summaryText, generatedAt, month })
+                    body:    JSON.stringify({ summary: summaryText, generatedAt, month, cpiBlurb, lfprBlurb, dxyBlurb })
                 }
             );
             if (!blobRes.ok) throw new Error(`Blobs PUT returned ${blobRes.status}`);
@@ -224,7 +241,7 @@ Include specific numbers. Do not use bullet points — write in full paragraphs.
                 'Content-Type':                'application/json',
                 'Access-Control-Allow-Origin': '*'
             },
-            body: JSON.stringify({ summary: summaryText, generatedAt, month })
+            body: JSON.stringify({ summary: summaryText, generatedAt, month, cpiBlurb, lfprBlurb, dxyBlurb })
         };
 
     } catch (err) {

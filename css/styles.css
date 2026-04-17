@@ -954,16 +954,52 @@ body {
     /* Row 2: Wages + LFPR fill under GDP */
     .snap-wages        { grid-column: 6 / 10;  grid-row: 5 / 9;  }
     .snap-lfpr         { grid-column: 10 / 13; grid-row: 5 / 9;  }
+    /* Blurb break: CPI insight (left) + LFPR insight (right) */
+    .snap-blurb-cpi    { grid-column: 1 / 7;   grid-row: 9 / 13; }
+    .snap-blurb-lfpr   { grid-column: 7 / 13;  grid-row: 9 / 13; }
     /* Full-width yield curve banner */
-    .snap-yield        { grid-column: 1 / 13;  grid-row: 9 / 13; }
+    .snap-yield        { grid-column: 1 / 13;  grid-row: 13 / 17;}
     /* Middle band: Fed, Real Yield, CAPE */
-    .snap-fed          { grid-column: 1 / 4;   grid-row: 13 / 18;}
-    .snap-realyield    { grid-column: 4 / 8;   grid-row: 13 / 18;}
-    .snap-cape         { grid-column: 8 / 13;  grid-row: 13 / 18;}
+    .snap-fed          { grid-column: 1 / 4;   grid-row: 17 / 22;}
+    .snap-realyield    { grid-column: 4 / 8;   grid-row: 17 / 22;}
+    .snap-cape         { grid-column: 8 / 13;  grid-row: 17 / 22;}
+    /* Blurb break: DXY insight full-width */
+    .snap-blurb-dxy    { grid-column: 1 / 13;  grid-row: 22 / 25;}
     /* Bottom band: DXY, Credit Spreads, Debt Service */
-    .snap-dxy          { grid-column: 1 / 5;   grid-row: 18 / 22;}
-    .snap-creditspreads{ grid-column: 5 / 9;   grid-row: 18 / 22;}
-    .snap-debtservice  { grid-column: 9 / 13;  grid-row: 18 / 22;}
+    .snap-dxy          { grid-column: 1 / 5;   grid-row: 25 / 29;}
+    .snap-creditspreads{ grid-column: 5 / 9;   grid-row: 25 / 29;}
+    .snap-debtservice  { grid-column: 9 / 13;  grid-row: 25 / 29;}
+}
+
+/* Panel insight blurbs — dark blue text cards that break up the chart grid */
+.snap-blurb {
+    background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%);
+    border-radius: 14px;
+    padding: var(--spacing-lg);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    box-shadow: var(--shadow-sm);
+}
+
+.blurb-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: rgba(255, 255, 255, 0.55);
+    margin-bottom: 0.65rem;
+}
+
+.blurb-text {
+    font-size: 0.92rem;
+    color: #ffffff;
+    line-height: 1.7;
+}
+
+.blurb-loading {
+    color: rgba(255, 255, 255, 0.4);
+    font-style: italic;
 }
 
 /* Time-range toggle (GDP panel) */
@@ -1195,7 +1231,10 @@ body {
     }
     .snap-inflation,
     .snap-gdp,
-    .snap-yield {
+    .snap-yield,
+    .snap-blurb-cpi,
+    .snap-blurb-lfpr,
+    .snap-blurb-dxy {
         grid-column: span 2;
     }
     .panel-chart-wrap {
@@ -1209,7 +1248,10 @@ body {
     }
     .snap-inflation,
     .snap-gdp,
-    .snap-yield {
+    .snap-yield,
+    .snap-blurb-cpi,
+    .snap-blurb-lfpr,
+    .snap-blurb-dxy {
         grid-column: span 1;
     }
 }

@@ -139,10 +139,6 @@
     <!-- ECONOMIC SNAPSHOT SECTION -->
     <section class="snapshot-section">
 
-        <div class="snapshot-section-header">
-            <h2>Economic Snapshot</h2>
-        </div>
-
         <!-- Shown while getData() is running; replaced by the grid once data arrives -->
         <div class="snapshot-loading-overlay" id="snapshotLoading">
             <div class="spinner"></div>
@@ -209,6 +205,16 @@
                 </div>
             </div>
 
+            <!-- Blurb break: CPI insight + LFPR insight -->
+            <div class="snap-blurb snap-blurb-cpi">
+                <p class="blurb-label">CPI Trend</p>
+                <p class="blurb-text blurb-loading" id="blurbCPI">Loading insight&hellip;</p>
+            </div>
+            <div class="snap-blurb snap-blurb-lfpr">
+                <p class="blurb-label">Labor Force</p>
+                <p class="blurb-text blurb-loading" id="blurbLFPR">Loading insight&hellip;</p>
+            </div>
+
             <!-- Panel 5: Yield Curve — full-width banner -->
             <div class="snapshot-panel snap-yield">
                 <p class="panel-title">10Y–2Y Yield Curve Spread</p>
@@ -263,6 +269,12 @@
                 <div class="panel-chart-wrap">
                     <canvas id="chartCAPE"></canvas>
                 </div>
+            </div>
+
+            <!-- Blurb break: DXY insight full-width -->
+            <div class="snap-blurb snap-blurb-dxy">
+                <p class="blurb-label">U.S. Dollar</p>
+                <p class="blurb-text blurb-loading" id="blurbDXY">Loading insight&hellip;</p>
             </div>
 
             <!-- Panel 9: U.S. Dollar Index (DXY) -->
@@ -322,9 +334,9 @@
 
     <!-- SCRIPTS -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
-    <script src="js/cache.js?v=2"></script>
-    <script src="js/data-service.js?v=2"></script>
-    <script src="js/script.js?v=2"></script>
-    <script src="js/snapshot.js?v=2"></script>
+    <script src="js/cache.js?v=3"></script>
+    <script src="js/data-service.js?v=3"></script>
+    <script src="js/script.js?v=3"></script>
+    <script src="js/snapshot.js?v=3"></script>
 </body>
 </html>

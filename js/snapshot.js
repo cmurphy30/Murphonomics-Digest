@@ -905,6 +905,25 @@
             });
         }
 
+        // Populate panel blurbs if available (new summaries only — old cache won't have them)
+        const blurbEls = {
+            cpi:  document.getElementById('blurbCPI'),
+            lfpr: document.getElementById('blurbLFPR'),
+            dxy:  document.getElementById('blurbDXY')
+        };
+        if (blurbEls.cpi && summaryData.cpiBlurb) {
+            blurbEls.cpi.textContent = summaryData.cpiBlurb;
+            blurbEls.cpi.classList.remove('blurb-loading');
+        }
+        if (blurbEls.lfpr && summaryData.lfprBlurb) {
+            blurbEls.lfpr.textContent = summaryData.lfprBlurb;
+            blurbEls.lfpr.classList.remove('blurb-loading');
+        }
+        if (blurbEls.dxy && summaryData.dxyBlurb) {
+            blurbEls.dxy.textContent = summaryData.dxyBlurb;
+            blurbEls.dxy.classList.remove('blurb-loading');
+        }
+
         // Wire up collapse behaviour
         initCollapse();
     }

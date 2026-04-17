@@ -10,7 +10,7 @@
  *     (cache expires after 24 hours — managed by js/cache.js)
  *   - Fetches FRED, BLS, and BEA data in parallel
  *   - Builds a flat "snapshot" (one latest value per indicator) from that data
- *   - POSTs the snapshot to economic-summary, which calls Claude and returns text
+ *   - POSTs the snapshot to economic-summary_v2, which calls Claude and returns text
  *   - If a data source fails, the page still loads — failed sources return null
  *
  * ─── How to use ────────────────────────────────────────────────────────────
@@ -20,7 +20,7 @@
  *   data.fred.fedfunds           // [{ date, value }, ...]  Federal Funds Rate
  *   data.bls.headlineCPIYoY      // CPI year-over-year % change series
  *   data.bea.realGDP             // quarterly GDP growth series
- *   data.summary.summary         // AI-generated summary text (string)
+ *   data.summary_v2.summary_v2         // AI-generated summary_v2 text (string)
  *   data.errors                  // array of error strings (empty if all OK)
  *
  * ─── Script tag order ──────────────────────────────────────────────────────
@@ -34,7 +34,7 @@
 // ─── Site token ──────────────────────────────────────────────────────────────
 
 // This token is NOT secret — it's visible in frontend code.
-// Its only job is to prevent random public abuse of the economic-summary endpoint.
+// Its only job is to prevent random public abuse of the economic-summary_v2 endpoint.
 // Set the same value in Netlify environment variables as SUMMARY_TOKEN.
 const SITE_TOKEN = 'murphonomics-2024';
 
@@ -144,16 +144,16 @@ function buildSnapshot(fred, bls, bea) {
 
 // ─── Summary fetch ────────────────────────────────────────────────────────────
 
-// POST a pre-built snapshot to the economic-summary function.
+// POST a pre-built snapshot to the economic-summary_v2 function.
 // The function only calls Claude — no re-fetching of APIs on the server side.
 async function fetchSummary(fred, bls, bea) {
     // Use the 30-day TTL (SUMMARY_CACHE_TTL_MS) — summaries are generated monthly
-    const cached = getFromCache('summary', SUMMARY_CACHE_TTL_MS);
+    const cached = getFromCache('summary_v2', SUMMARY_CACHE_TTL_MS);
     if (cached) return cached;
 
     const snapshot = buildSnapshot(fred, bls, bea);
 
-    const response = await fetch('/.netlify/functions/economic-summary', {
+    const response = await fetch('/.netlify/functions/economic-summary_v2', {
         method:  'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -168,13 +168,13 @@ async function fetchSummary(fred, bls, bea) {
             const errData = await response.json();
             if (errData.error) detail = ' — ' + errData.error;
         } catch (_) {}
-        throw new Error(`AI-generated economic summary returned HTTP ${response.status}${detail}`);
+        throw new Error(`AI-generated economic summary_v2 returned HTTP ${response.status}${detail}`);
     }
 
     const data = await response.json();
-    if (data && data.error) throw new Error(`AI-generated economic summary: ${data.error}`);
+    if (data && data.error) throw new Error(`AI-generated economic summary_v2: ${data.error}`);
 
-    saveToCache('summary', data);
+    saveToCache('summary_v2', data);
     return data;
 }
 
@@ -184,11 +184,11 @@ async function fetchSummary(fred, bls, bea) {
  * getData() — fetch all economic data and return it as one object.
  *
  * Step 1: Fetch FRED, BLS, and BEA in parallel (checks cache first each time).
- * Step 2: Build a snapshot from that data and POST to economic-summary for Claude.
+ * Step 2: Build a snapshot from that data and POST to economic-summary_v2 for Claude.
  *
  * Never throws — errors are captured in data.errors so the page still renders.
  *
- * @returns {Promise<{ fred, bls, bea, summary, errors: string[] }>}
+ * @returns {Promise<{ fred, bls, bea, summary_v2, errors: string[] }>}
  */
 async function getData() {
     const errors = [];
@@ -208,15 +208,15 @@ async function getData() {
 
     // Step 2: Build snapshot from available data and POST to Claude
     // (runs after data fetch so the snapshot has real values, not nulls)
-    let summary = null;
+    let summary_v2 = null;
     try {
-        summary = await fetchSummary(fred, bls, bea);
+        summary_v2 = await fetchSummary(fred, bls, bea);
     } catch (err) {
-        errors.push(`Could not load AI-generated economic summary: ${err.message}`);
+        errors.push(`Could not load AI-generated economic summary_v2: ${err.message}`);
         console.warn('[data-service]', err.message);
     }
 
-    return { fred, bls, bea, summary, errors };
+    return { fred, bls, bea, summary_v2, errors };
 }
 
 // ─── Error display helper ────────────────────────────────────────────────────
