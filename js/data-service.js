@@ -144,7 +144,7 @@ function buildSnapshot(fred, bls, bea) {
 
 // ─── Summary fetch ────────────────────────────────────────────────────────────
 
-// POST a pre-built snapshot to the economic-summary_v2 function.
+// POST a pre-built snapshot to the economic-summary function.
 // The function only calls Claude — no re-fetching of APIs on the server side.
 async function fetchSummary(fred, bls, bea) {
     // Use the 30-day TTL (SUMMARY_CACHE_TTL_MS) — summaries are generated monthly
@@ -153,7 +153,7 @@ async function fetchSummary(fred, bls, bea) {
 
     const snapshot = buildSnapshot(fred, bls, bea);
 
-    const response = await fetch('/.netlify/functions/economic-summary_v2', {
+    const response = await fetch('/.netlify/functions/economic-summary', {
         method:  'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -168,11 +168,11 @@ async function fetchSummary(fred, bls, bea) {
             const errData = await response.json();
             if (errData.error) detail = ' — ' + errData.error;
         } catch (_) {}
-        throw new Error(`AI-generated economic summary_v2 returned HTTP ${response.status}${detail}`);
+        throw new Error(`AI-generated economic summary returned HTTP ${response.status}${detail}`);
     }
 
     const data = await response.json();
-    if (data && data.error) throw new Error(`AI-generated economic summary_v2: ${data.error}`);
+    if (data && data.error) throw new Error(`AI-generated economic summary: ${data.error}`);
 
     saveToCache('summary_v2', data);
     return data;
@@ -184,11 +184,11 @@ async function fetchSummary(fred, bls, bea) {
  * getData() — fetch all economic data and return it as one object.
  *
  * Step 1: Fetch FRED, BLS, and BEA in parallel (checks cache first each time).
- * Step 2: Build a snapshot from that data and POST to economic-summary_v2 for Claude.
+ * Step 2: Build a snapshot from that data and POST to economic-summary for Claude.
  *
  * Never throws — errors are captured in data.errors so the page still renders.
  *
- * @returns {Promise<{ fred, bls, bea, summary_v2, errors: string[] }>}
+ * @returns {Promise<{ fred, bls, bea, summary, errors: string[] }>}
  */
 async function getData() {
     const errors = [];
@@ -208,15 +208,15 @@ async function getData() {
 
     // Step 2: Build snapshot from available data and POST to Claude
     // (runs after data fetch so the snapshot has real values, not nulls)
-    let summary_v2 = null;
+    let summary = null;
     try {
-        summary_v2 = await fetchSummary(fred, bls, bea);
+        summary = await fetchSummary(fred, bls, bea);
     } catch (err) {
-        errors.push(`Could not load AI-generated economic summary_v2: ${err.message}`);
+        errors.push(`Could not load AI-generated economic summary: ${err.message}`);
         console.warn('[data-service]', err.message);
     }
 
-    return { fred, bls, bea, summary_v2, errors };
+    return { fred, bls, bea, summary, errors };
 }
 
 // ─── Error display helper ────────────────────────────────────────────────────
