@@ -211,7 +211,7 @@ Return only valid JSON. No markdown code fences. No bullet points anywhere.`
         // Key format: "summary-YYYY-MM" (e.g. "summary-2025-04").
         try {
             const { getStore } = require('@netlify/blobs');
-            const store    = getStore('summaries');
+            const store    = getStore({ name: 'summaries', siteID: process.env.NETLIFY_SITE_ID, token: process.env.NETLIFY_TOKEN });
             const monthKey = `summary-${now.toISOString().slice(0, 7)}`;
             await store.setJSON(monthKey, { summary: summaryText, generatedAt, month, cpiBlurb, lfprBlurb, dxyBlurb });
             console.log('[economic-summary] saved to Blobs under key:', monthKey);

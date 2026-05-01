@@ -24,7 +24,7 @@ exports.handler = async function (event) {
     }
 
     try {
-        const store = getStore('summaries');
+        const store = getStore({ name: 'summaries', siteID: process.env.NETLIFY_SITE_ID, token: process.env.NETLIFY_TOKEN });
         const { blobs } = await store.list();
 
         if (!blobs || blobs.length === 0) {
